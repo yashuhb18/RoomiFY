@@ -1,0 +1,213 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  STUDENT
+  WARDEN
+  STAFF
+  SUPER_ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  CHECKED_IN
+  CHECKED_OUT
+}
+
+enum TicketStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum ItemStatus {
+  AVAILABLE
+  SOLD
+}
+
+enum TxStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model Hostel {
+  id               String            @id @default(uuid())
+  name             String
+  address          String?
+  rooms            Room[]
+  users            User[]
+  tickets          Ticket[]
+  marketplaceItems MarketplaceItem[]
+  auditLogs        AuditLog[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@map("hostels")
+}
+
+model User {
+  id              String            @id @default(uuid())
+  email           String            @unique
+  passwordHash    String
+  role            Role              @default(STUDENT)
+  mfaSecret       String?
+  isMfaEnabled    Boolean           @default(false)
+  isActive        Boolean           @default(true)
+  refreshTokenHash String?
+  profile         Json?             // { sleepSchedule, cleanliness, studyStyle, smoking, music }
+
+  hostelId        String
+  hostel          Hostel            @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  bookings        Booking[]
+  tickets         Ticket[]          @relation("StudentTickets")
+  assignedTickets Ticket[]          @relation("StaffAssignment")
+  listings        MarketplaceItem[] @relation("Seller")
+  purchases       Transaction[]
+  auditLogs       AuditLog[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@map("users")
+}
+
+model Room {
+  id               String    @id @default(uuid())
+  roomNumber       String
+  floor            Int?
+  capacity         Int       @default(2)
+  currentOccupancy Int       @default(0)
+
+  hostelId         String
+  hostel           Hostel    @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  bookings         Booking[]
+
+  @@unique([hostelId, roomNumber])
+  @@map("rooms")
+}
+
+model Booking {
+  id           String        @id @default(uuid())
+  status       BookingStatus @default(PENDING)
+  startDate    DateTime
+  endDate      DateTime
+
+  roomId       String
+  room         Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  studentId    String
+  student      User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  checkedInAt  DateTime?
+  checkedOutAt DateTime?
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([roomId, startDate, endDate])
+  @@map("bookings")
+}
+
+model Ticket {
+  id           String       @id @default(uuid())
+  category     String
+  description  String
+  photoUrl     String?
+  status       TicketStatus @default(OPEN)
+  slaDeadline  DateTime
+  breachRisk   Boolean      @default(false)
+
+  hostelId     String
+  hostel       Hostel       @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  studentId    String
+  student      User         @relation("StudentTickets", fields: [studentId], references: [id], onDelete: Cascade)
+
+  assignedTo   String?
+  assignedStaff User?       @relation("StaffAssignment", fields: [assignedTo], references: [id])
+
+  resolvedAt   DateTime?
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@map("tickets")
+}
+
+model MarketplaceItem {
+  id           String       @id @default(uuid())
+  title        String
+  description  String?
+  price        Float
+  imageUrl     String?
+  status       ItemStatus   @default(AVAILABLE)
+
+  hostelId     String
+  hostel       Hostel       @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  sellerId     String
+  seller       User         @relation("Seller", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  transactions Transaction[]
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@map("marketplace_items")
+}
+
+model Transaction {
+  id              String   @id @default(uuid())
+  amount          Float
+  stripePaymentId String?
+  status          TxStatus @default(PENDING)
+
+  itemId          String
+  item            MarketplaceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  buyerId         String
+  buyer           User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("transactions")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  userAgent  String?
+
+  hostelId   String
+  hostel     Hostel   @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  timestamp  DateTime @default(now())
+
+  @@map("audit_logs")
+}
