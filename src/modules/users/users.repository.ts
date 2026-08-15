@@ -12,6 +12,7 @@ export class UsersRepository {
       select: {
         id: true,
         email: true,
+        passwordHash: true,
         role: true,
         isMfaEnabled: true,
         isActive: true,
@@ -81,6 +82,13 @@ export class UsersRepository {
     return this.prisma.user.update({
       where: { id: userId },
       data: { isActive: false, refreshTokenHash: null },
+    });
+  }
+
+  async updatePasswordHash(userId: string, passwordHash: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
     });
   }
 }

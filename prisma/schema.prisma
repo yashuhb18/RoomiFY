@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
@@ -45,17 +46,99 @@ enum TxStatus {
   FAILED
 }
 
+enum InvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum RoomCondition {
+  EXCELLENT
+  GOOD
+  FAIR
+  NEEDS_MAINTENANCE
+  UNDER_MAINTENANCE
+  UNAVAILABLE
+}
+
+enum RoomStatus {
+  AVAILABLE
+  PARTIALLY_OCCUPIED
+  FULL
+  UNDER_MAINTENANCE
+  BLOCKED
+  RESERVED
+  UNAVAILABLE
+}
+
+enum RoomType {
+  SINGLE
+  DOUBLE
+  TRIPLE
+  QUAD
+  DORMITORY
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  EXPIRED
+}
+
+enum AllocationStatus {
+  ALLOCATED
+  CHECKED_IN
+  CHECKED_OUT
+  TRANSFER_REQUESTED
+  TRANSFERRED
+  CANCELLED
+}
+
+enum RoommateRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+enum CreditTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  DIAMOND
+}
+
+enum TaskType {
+  AUTO
+  VERIFIED
+}
+
+enum CreditTxType {
+  EARN
+  SPEND
+  CONVERT
+  EXPIRE
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model Hostel {
   id               String            @id @default(uuid())
   name             String
   address          String?
+  floors           Floor[]
   rooms            Room[]
   users            User[]
   tickets          Ticket[]
   marketplaceItems MarketplaceItem[]
   auditLogs        AuditLog[]
+  allocations      Allocation[]
+  invoices         Invoice[]
+  directMessages   DirectMessage[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -63,25 +146,45 @@ model Hostel {
 }
 
 model User {
-  id              String            @id @default(uuid())
-  email           String            @unique
-  passwordHash    String
-  role            Role              @default(STUDENT)
-  mfaSecret       String?
-  isMfaEnabled    Boolean           @default(false)
-  isActive        Boolean           @default(true)
+  id               String            @id @default(uuid())
+  email            String            @unique
+  passwordHash     String?
+  googleId         String?           @unique
+  isEmailVerified  Boolean           @default(false)
+  role             Role              @default(STUDENT)
+  mfaSecret        String?
+  isMfaEnabled     Boolean           @default(false)
+  isActive         Boolean           @default(true)
+  isEvicted        Boolean           @default(false)
+  isSuspended      Boolean           @default(false)
+  evictionReason   String?
   refreshTokenHash String?
-  profile         Json?             // { sleepSchedule, cleanliness, studyStyle, smoking, music }
+  profile          Json?             // { sleepSchedule, cleanliness, studyStyle, smoking, music, fullName, ... }
 
   hostelId        String
   hostel          Hostel            @relation(fields: [hostelId], references: [id], onDelete: Cascade)
 
-  bookings        Booking[]
-  tickets         Ticket[]          @relation("StudentTickets")
-  assignedTickets Ticket[]          @relation("StaffAssignment")
-  listings        MarketplaceItem[] @relation("Seller")
-  purchases       Transaction[]
-  auditLogs       AuditLog[]
+  bookings                 Booking[]
+  tickets                  Ticket[]          @relation("StudentTickets")
+  assignedTickets          Ticket[]          @relation("StaffAssignment")
+  listings                 MarketplaceItem[] @relation("Seller")
+  purchases                Transaction[]
+  auditLogs                AuditLog[]
+  invoices                 Invoice[]
+  allocations              Allocation[]      @relation("StudentAllocation")
+  allocatedByActions       Allocation[]      @relation("AllocatedBy")
+  roomRequests             RoomRequest[]     @relation("StudentRoomRequest")
+  reviewedRoomRequests     RoomRequest[]     @relation("ReviewedBy")
+  sentRoommateRequests     RoommateRequest[] @relation("RoommateRequester")
+  receivedRoommateRequests RoommateRequest[] @relation("RoommateTarget")
+  sentDirectMessages       DirectMessage[]   @relation("SentDirectMessages")
+  receivedDirectMessages   DirectMessage[]   @relation("ReceivedDirectMessages")
+
+  // ─── Activity Hub Relations ─────────────────────────────────────────
+  creditAccount            CreditAccount?
+  taskCompletions          TaskCompletion[]
+  verifiedTasks            TaskCompletion[]  @relation("VerifiedBy")
+  userAchievements         UserAchievement[]
 
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -89,21 +192,163 @@ model User {
   @@map("users")
 }
 
+model Floor {
+  id         String   @id @default(uuid())
+  floorNumber Int
+  name       String?  // e.g. "Ground Floor", "First Floor"
+
+  hostelId   String
+  hostel     Hostel   @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  rooms      Room[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([hostelId, floorNumber])
+  @@map("floors")
+}
+
 model Room {
-  id               String    @id @default(uuid())
+  id               String        @id @default(uuid())
   roomNumber       String
-  floor            Int?
-  capacity         Int       @default(2)
-  currentOccupancy Int       @default(0)
+  floor            Int?          // Legacy field kept for compatibility
+  capacity         Int           @default(2)
+  currentOccupancy Int           @default(0)
+
+  // New production fields
+  roomType         RoomType      @default(DOUBLE)
+  condition        RoomCondition @default(GOOD)
+  status           RoomStatus    @default(AVAILABLE)
+  facilities       Json?         // ["bed", "study_table", "cupboard", "fan", "wifi", ...]
+  description      String?
+  gender           String?       // "male", "female", "any"
 
   hostelId         String
-  hostel           Hostel    @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+  hostel           Hostel        @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  floorId          String?
+  floorRef         Floor?        @relation(fields: [floorId], references: [id], onDelete: SetNull)
 
   bookings         Booking[]
+  beds             Bed[]
+  images           RoomImage[]
+  roomRequests     RoomRequest[]
+  allocations      Allocation[]
 
   @@unique([hostelId, roomNumber])
   @@map("rooms")
 }
+
+model Bed {
+  id          String  @id @default(uuid())
+  bedNumber   Int
+  label       String? // e.g. "B1", "B2", "Bed A"
+  isAvailable Boolean @default(true)
+
+  roomId      String
+  room        Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  allocations Allocation[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([roomId, bedNumber])
+  @@map("beds")
+}
+
+model RoomImage {
+  id            String   @id @default(uuid())
+  secureUrl     String   // Supabase Storage public URL
+  publicId      String?  // Storage path / Cloudinary public_id
+  isPrimary     Boolean  @default(false)
+  displayOrder  Int      @default(0)
+  width         Int?
+  height        Int?
+
+  roomId        String
+  room          Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  uploadedBy    String?
+
+  createdAt     DateTime @default(now())
+
+  @@map("room_images")
+}
+
+model RoomRequest {
+  id              String        @id @default(uuid())
+  status          RequestStatus @default(PENDING)
+  notes           String?
+  rejectionReason String?
+
+  studentId       String
+  student         User          @relation("StudentRoomRequest", fields: [studentId], references: [id], onDelete: Cascade)
+
+  roomId          String
+  room            Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  preferredBedId  String?
+
+  reviewedById    String?
+  reviewedBy      User?         @relation("ReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  requestedAt     DateTime      @default(now())
+  reviewedAt      DateTime?
+
+  @@map("room_requests")
+}
+
+model Allocation {
+  id             String           @id @default(uuid())
+  status         AllocationStatus @default(ALLOCATED)
+
+  studentId      String
+  student        User             @relation("StudentAllocation", fields: [studentId], references: [id], onDelete: Cascade)
+
+  roomId         String
+  room           Room             @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  bedId          String?
+  bed            Bed?             @relation(fields: [bedId], references: [id], onDelete: SetNull)
+
+  hostelId       String
+  hostel         Hostel           @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  allocatedById  String?
+  allocatedBy    User?            @relation("AllocatedBy", fields: [allocatedById], references: [id], onDelete: SetNull)
+
+  allocatedAt    DateTime         @default(now())
+  checkedInAt    DateTime?
+  checkedOutAt   DateTime?
+  releasedAt     DateTime?
+  releaseReason  String?
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@map("allocations")
+}
+
+model RoommateRequest {
+  id          String                @id @default(uuid())
+  status      RoommateRequestStatus @default(PENDING)
+
+  requesterId String
+  requester   User                  @relation("RoommateRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+
+  targetId    String
+  target      User                  @relation("RoommateTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime              @default(now())
+  respondedAt DateTime?
+
+  @@unique([requesterId, targetId])
+  @@map("roommate_requests")
+}
+
+// ─── Existing Models (Preserved) ─────────────────────────────────────────────
 
 model Booking {
   id           String        @id @default(uuid())
@@ -210,4 +455,174 @@ model AuditLog {
   timestamp  DateTime @default(now())
 
   @@map("audit_logs")
+}
+
+model Invoice {
+  id          String        @id @default(uuid())
+  title       String
+  description String?
+  amount      Float
+  status      InvoiceStatus @default(PENDING)
+  dueDate     DateTime?
+
+  hostelId    String
+  hostel      Hostel        @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  studentId   String
+  student     User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  payments    PaymentRecord[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("invoices")
+}
+
+model PaymentRecord {
+  id              String   @id @default(uuid())
+  amountPaid      Float
+  gatewayId       String?  // Razorpay order_id or Stripe session_id
+  paymentId       String?  // Razorpay payment_id
+  status          TxStatus @default(PENDING)
+  method          String?  // UPI, Card, Netbanking
+
+  invoiceId       String
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("payment_records")
+}
+
+model DirectMessage {
+  id          String   @id @default(uuid())
+  content     String
+  isRead      Boolean  @default(false)
+
+  senderId    String
+  sender      User     @relation("SentDirectMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId  String
+  receiver    User     @relation("ReceivedDirectMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  hostelId    String
+  hostel      Hostel   @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("direct_messages")
+}
+
+// ─── Activity Hub Models ─────────────────────────────────────────────────────
+
+model CreditAccount {
+  id            String            @id @default(uuid())
+  balance       Int               @default(0)
+  totalEarned   Int               @default(0)
+  totalSpent    Int               @default(0)
+  tier          CreditTier        @default(BRONZE)
+
+  userId        String            @unique
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  transactions  CreditTransaction[]
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("credit_accounts")
+}
+
+model CreditTransaction {
+  id               String          @id @default(uuid())
+  amount           Int             // positive = earn, negative = spend
+  type             CreditTxType
+  description      String
+  balanceAfter     Int             // snapshot of balance after this tx
+
+  accountId        String
+  account          CreditAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  taskCompletionId String?
+  taskCompletion   TaskCompletion? @relation(fields: [taskCompletionId], references: [id], onDelete: SetNull)
+
+  createdAt        DateTime        @default(now())
+
+  @@index([accountId, createdAt])
+  @@map("credit_transactions")
+}
+
+model Task {
+  id             String          @id @default(uuid())
+  slug           String          @unique
+  name           String
+  description    String?
+  credits        Int
+  taskType       TaskType        @default(AUTO)
+  cooldownHours  Int             @default(24)
+  roleTarget     Role            @default(STUDENT)  // Which role can do this task
+  emoji          String?         // Display emoji
+  isActive       Boolean         @default(true)
+
+  completions    TaskCompletion[]
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@map("tasks")
+}
+
+model TaskCompletion {
+  id             String              @id @default(uuid())
+  status         String              @default("COMPLETED") // COMPLETED, PENDING_VERIFICATION, REJECTED
+
+  userId         String
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  taskId         String
+  task           Task                @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  verifiedById   String?
+  verifiedBy     User?               @relation("VerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull)
+
+  creditTransactions CreditTransaction[]
+
+  completedAt    DateTime            @default(now())
+  verifiedAt     DateTime?
+
+  @@index([userId, taskId, completedAt])
+  @@map("task_completions")
+}
+
+model Achievement {
+  id             String            @id @default(uuid())
+  slug           String            @unique
+  name           String
+  description    String?
+  emoji          String            @default("🏆")
+  criteria       Json              // { type: "credits_total", threshold: 500 } or { type: "tasks_count", threshold: 50 }
+
+  userAchievements UserAchievement[]
+
+  createdAt      DateTime          @default(now())
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id             String      @id @default(uuid())
+
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  achievementId  String
+  achievement    Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  unlockedAt     DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
 }

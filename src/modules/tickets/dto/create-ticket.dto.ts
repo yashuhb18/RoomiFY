@@ -12,4 +12,8 @@ export class CreateTicketDto {
   @IsOptional()
   @IsString()
   photoUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  studentId?: string;
 }

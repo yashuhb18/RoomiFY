@@ -20,4 +20,14 @@ export default () => ({
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
   },
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+  mail: {
+    user: process.env.MAIL_USER || '',
+    password: process.env.MAIL_PASSWORD || '',
+    from: process.env.MAIL_FROM || '"RoomiFY" <roomify.org@gmail.com>',
+  },
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback',
+  },
 });

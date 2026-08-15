@@ -7,7 +7,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Stripe from 'stripe';
+import * as crypto from 'crypto';
+const Razorpay = require('razorpay');
 import { MarketplaceRepository } from './marketplace.repository';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { AuditService } from '../audit/audit.service';
@@ -17,7 +18,7 @@ import { ItemStatus, TxStatus } from '@prisma/client';
 @Injectable()
 export class MarketplaceService {
   private readonly logger = new Logger(MarketplaceService.name);
-  private readonly stripe: Stripe;
+  private razorpay: any;
   private readonly frontendUrl: string;
 
   constructor(
@@ -26,8 +27,11 @@ export class MarketplaceService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
   ) {
-    this.stripe = new Stripe(configService.get<string>('stripe.secretKey')!, {
-      apiVersion: '2023-10-16',
+    const keyId = this.configService.get<string>('RAZORPAY_KEY_ID') || process.env.RAZORPAY_KEY_ID;
+    const keySecret = this.configService.get<string>('RAZORPAY_KEY_SECRET') || process.env.RAZORPAY_KEY_SECRET;
+    this.razorpay = new Razorpay({
+      key_id: keyId,
+      key_secret: keySecret,
     });
     this.frontendUrl = configService.get<string>('frontendUrl')!;
   }
@@ -105,40 +109,27 @@ export class MarketplaceService {
         },
       });
 
-      // Create Stripe Checkout Session
-      const session = await this.stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price_data: {
-              currency: 'inr',
-              product_data: {
-                name: item.title,
-                description: item.description || undefined,
-              },
-              unit_amount: Math.round(item.price * 100),
-            },
-            quantity: 1,
-          },
-        ],
-        mode: 'payment',
-        success_url: `${this.frontendUrl}/student/marketplace?success=true`,
-        cancel_url: `${this.frontendUrl}/student/marketplace?canceled=true`,
-        metadata: {
-          itemId,
-          buyerId,
-          transactionId: transaction.id,
-          hostelId,
-        },
-      });
+      // Create Razorpay Order
+      const options = {
+        amount: Math.round(item.price * 100),
+        currency: 'INR',
+        receipt: `market_${transaction.id.substring(0, 8)}`,
+      };
+      
+      const order = await this.razorpay.orders.create(options);
 
-      // Store Stripe session ID
+      // Store Razorpay order ID in stripePaymentId (reusing the field for gateway ID)
       await this.prisma.transaction.update({
         where: { id: transaction.id },
-        data: { stripePaymentId: session.id },
+        data: { stripePaymentId: order.id },
       });
 
-      return { url: session.url };
+      return {
+        orderId: order.id,
+        amount: options.amount,
+        currency: options.currency,
+        keyId: this.configService.get<string>('RAZORPAY_KEY_ID') || process.env.RAZORPAY_KEY_ID,
+      };
     } catch (error) {
       if (
         error instanceof NotFoundException ||
@@ -147,9 +138,47 @@ export class MarketplaceService {
       ) {
         throw error;
       }
-      this.logger.error('Error buying item', error instanceof Error ? error.stack : undefined);
-      throw new InternalServerErrorException('Failed to initiate purchase.');
+      this.logger.error('Error buying item:', error);
+      throw new InternalServerErrorException(error instanceof Error ? error.message : 'Failed to initiate purchase.');
     }
+  }
+
+  async verifyPayment(razorpayOrderId: string, razorpayPaymentId: string, razorpaySignature: string) {
+    const secret = this.configService.get<string>('RAZORPAY_KEY_SECRET') || process.env.RAZORPAY_KEY_SECRET;
+
+    const body = razorpayOrderId + '|' + razorpayPaymentId;
+    const expectedSignature = crypto
+      .createHmac('sha256', secret!)
+      .update(body.toString())
+      .digest('hex');
+
+    if (expectedSignature !== razorpaySignature) {
+      throw new BadRequestException('Invalid payment signature');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const transaction = await tx.transaction.findFirst({
+        where: { stripePaymentId: razorpayOrderId },
+      });
+
+      if (!transaction) {
+        throw new NotFoundException('Transaction not found');
+      }
+
+      await tx.transaction.update({
+        where: { id: transaction.id },
+        data: {
+          status: TxStatus.COMPLETED,
+        },
+      });
+
+      await tx.marketplaceItem.update({
+        where: { id: transaction.itemId },
+        data: { status: ItemStatus.SOLD },
+      });
+
+      return { success: true };
+    });
   }
 
   async deleteListing(id: string, userId: string, hostelId: string) {

@@ -3,12 +3,16 @@ import {
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
+  ForbiddenException,
   Logger,
 } from '@nestjs/common';
+import { JwtPayload } from '../../common/decorators';
 import { TicketsRepository } from './tickets.repository';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { AuditService } from '../audit/audit.service';
-import { TicketStatus } from '@prisma/client';
+import { MailService } from '../mail/mail.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { TicketStatus, Role } from '@prisma/client';
 
 // SLA thresholds in hours per category
 const SLA_THRESHOLDS: Record<string, number> = {
@@ -29,6 +33,8 @@ export class TicketsService {
   constructor(
     private readonly ticketsRepository: TicketsRepository,
     private readonly auditService: AuditService,
+    private readonly mailService: MailService,
+    private readonly prisma: PrismaService,
   ) {}
 
   /**
@@ -45,22 +51,26 @@ export class TicketsService {
   ) {
     try {
       const categoryLower = dto.category.toLowerCase().trim();
-      const thresholdHours = SLA_THRESHOLDS[categoryLower] || SLA_THRESHOLDS['other'];
+      const targetStudentId = dto.studentId || studentId;
+      const isDisciplinary = categoryLower.includes('disciplinary') || categoryLower.includes('rule');
+      const thresholdHours = isDisciplinary ? 12 : (SLA_THRESHOLDS[categoryLower] || SLA_THRESHOLDS['other']);
 
       // Calculate SLA deadline
       const slaDeadline = new Date();
       slaDeadline.setHours(slaDeadline.getHours() + thresholdHours);
 
-      // Predict breach risk
-      let breachRisk = false;
-      const avgResolutionTime =
-        await this.ticketsRepository.getAverageResolutionTime(
-          hostelId,
-          dto.category,
-        );
+      // Predict breach risk (Disciplinary escalations are automatically flagged HIGH RISK)
+      let breachRisk = isDisciplinary;
+      if (!isDisciplinary) {
+        const avgResolutionTime =
+          await this.ticketsRepository.getAverageResolutionTime(
+            hostelId,
+            dto.category,
+          );
 
-      if (avgResolutionTime !== null && avgResolutionTime > thresholdHours) {
-        breachRisk = true;
+        if (avgResolutionTime !== null && avgResolutionTime > thresholdHours) {
+          breachRisk = true;
+        }
       }
 
       const ticket = await this.ticketsRepository.create({
@@ -70,7 +80,7 @@ export class TicketsService {
         slaDeadline,
         breachRisk,
         hostelId,
-        studentId,
+        studentId: targetStudentId,
       });
 
       await this.auditService.log({
@@ -85,6 +95,33 @@ export class TicketsService {
         userId: studentId,
       });
 
+      // Send ticket-raised emails (fire-and-forget)
+      const studentEmail = ticket.student?.email;
+      if (studentEmail) {
+        const studentProfile = await this.prisma.user.findUnique({
+          where: { id: targetStudentId },
+          select: { profile: true },
+        });
+        const studentName = (studentProfile?.profile as any)?.fullName || '';
+
+        this.mailService.sendTicketRaisedEmail(
+          studentEmail, studentName, ticket.id, ticket.category,
+          dto.description, slaDeadline.toISOString(), breachRisk,
+        ).catch(() => {});
+
+        // Send warden alert
+        const wardens = await this.prisma.user.findMany({
+          where: { hostelId, role: { in: [Role.WARDEN, Role.SUPER_ADMIN] }, isActive: true },
+          select: { email: true },
+        });
+        for (const warden of wardens) {
+          this.mailService.sendTicketRaisedWardenAlert(
+            warden.email, studentEmail, ticket.id, ticket.category,
+            dto.description, slaDeadline.toISOString(), breachRisk,
+          ).catch(() => {});
+        }
+      }
+
       return ticket;
     } catch (error) {
       if (error instanceof BadRequestException) throw error;
@@ -93,13 +130,22 @@ export class TicketsService {
     }
   }
 
-  async findById(id: string) {
+  async findById(id: string, user: JwtPayload) {
     try {
       const ticket = await this.ticketsRepository.findById(id);
       if (!ticket) throw new NotFoundException('Ticket not found.');
+
+      // IDOR Protection Check
+      if (user.role === 'STUDENT' && ticket.studentId !== user.sub) {
+        throw new ForbiddenException('You do not have permission to view this ticket.');
+      }
+      if ((user.role === 'WARDEN' || user.role === 'STAFF') && ticket.hostelId !== user.hostelId) {
+        throw new ForbiddenException('This ticket does not belong to your assigned hostel.');
+      }
+
       return ticket;
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+      if (error instanceof NotFoundException || error instanceof ForbiddenException) throw error;
       this.logger.error('Error fetching ticket', error instanceof Error ? error.stack : undefined);
       throw new InternalServerErrorException('Failed to fetch ticket.');
     }
@@ -142,6 +188,11 @@ export class TicketsService {
       const ticket = await this.ticketsRepository.findById(ticketId);
       if (!ticket) throw new NotFoundException('Ticket not found.');
 
+      // IDOR Protection Check
+      if (ticket.hostelId !== hostelId) {
+        throw new ForbiddenException('You can only assign staff to tickets in your assigned hostel.');
+      }
+
       if (ticket.status === TicketStatus.RESOLVED) {
         throw new BadRequestException('Cannot assign staff to a resolved ticket.');
       }
@@ -174,6 +225,11 @@ export class TicketsService {
       const ticket = await this.ticketsRepository.findById(ticketId);
       if (!ticket) throw new NotFoundException('Ticket not found.');
 
+      // IDOR Protection Check
+      if (ticket.hostelId !== hostelId) {
+        throw new ForbiddenException('You can only update tickets in your assigned hostel.');
+      }
+
       const additionalData: any = {};
       if (status === TicketStatus.RESOLVED) {
         additionalData.resolvedAt = new Date();
@@ -192,6 +248,20 @@ export class TicketsService {
         hostelId,
         userId,
       });
+
+      // Send ticket-resolved email to student (fire-and-forget)
+      if (status === TicketStatus.RESOLVED && ticket.studentId) {
+        const student = await this.prisma.user.findUnique({
+          where: { id: ticket.studentId },
+          select: { email: true, profile: true },
+        });
+        if (student) {
+          const studentName = (student.profile as any)?.fullName || '';
+          this.mailService.sendTicketResolvedEmail(
+            student.email, studentName, ticket.id, ticket.category,
+          ).catch(() => {});
+        }
+      }
 
       return updated;
     } catch (error) {

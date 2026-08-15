@@ -10,6 +10,7 @@ import {
 import { Role } from '@prisma/client';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { CurrentUser, JwtPayload, Roles } from '../../common/decorators';
 
 @Controller('users')
@@ -27,6 +28,14 @@ export class UsersController {
     @Body() dto: UpdateProfileDto,
   ) {
     return this.usersService.updateProfile(user.sub, dto, user.hostelId);
+  }
+
+  @Patch('change-password')
+  async changePassword(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.usersService.changePassword(user.sub, dto, user.hostelId);
   }
 
   @Get('matches')
