@@ -11,7 +11,7 @@ import {
 import { Role } from '@prisma/client';
 import { HostelsService } from './hostels.service';
 import { CreateHostelDto } from './dto/create-hostel.dto';
-import { CurrentUser, JwtPayload, Roles } from '../../common/decorators';
+import { CurrentUser, JwtPayload, Roles, Public } from '../../common/decorators';
 
 @Controller('hostels')
 export class HostelsController {
@@ -26,8 +26,8 @@ export class HostelsController {
     return this.hostelsService.create(dto, user.sub);
   }
 
+  @Public()
   @Get()
-  @Roles(Role.WARDEN, Role.SUPER_ADMIN)
   async findAll() {
     return this.hostelsService.findAll();
   }

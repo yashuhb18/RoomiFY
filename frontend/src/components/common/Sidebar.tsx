@@ -4,14 +4,20 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard,
+  Building2,
   Users,
   Ticket,
   ShoppingBag,
   ShieldAlert,
-  Building2,
   KeyRound,
-  ShieldCheck,
+  CheckCircle2,
+  UserCheck,
+  FileSpreadsheet,
+  User,
+  MessageSquare,
+  CreditCard,
+  Shield,
+  HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -24,34 +30,47 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  // Warden Nav Items (11 Core Features)
   {
-    title: 'Overview',
-    href: '/student',
-    icon: LayoutDashboard,
-    roles: ['STUDENT'],
+    title: 'Rooms',
+    href: '/warden/rooms',
+    icon: Building2,
+    roles: ['WARDEN', 'SUPER_ADMIN'],
   },
   {
-    title: 'Roommate Match',
-    href: '/student/match',
+    title: 'Room Requests',
+    href: '/warden/requests',
+    icon: FileSpreadsheet,
+    roles: ['WARDEN', 'SUPER_ADMIN'],
+  },
+  {
+    title: 'Students',
+    href: '/warden/students',
     icon: Users,
-    roles: ['STUDENT'],
+    roles: ['WARDEN', 'SUPER_ADMIN'],
   },
   {
-    title: 'Maintenance Tickets',
-    href: '/student/tickets',
+    title: 'Tickets',
+    href: '/warden/tickets',
     icon: Ticket,
-    roles: ['STUDENT'],
+    roles: ['WARDEN', 'SUPER_ADMIN'],
   },
   {
     title: 'Marketplace',
-    href: '/student/marketplace',
+    href: '/warden/marketplace',
     icon: ShoppingBag,
-    roles: ['STUDENT'],
+    roles: ['WARDEN', 'SUPER_ADMIN'],
   },
   {
-    title: 'Warden Console',
-    href: '/warden',
-    icon: Building2,
+    title: 'Messages',
+    href: '/warden/messages',
+    icon: MessageSquare,
+    roles: ['WARDEN', 'SUPER_ADMIN'],
+  },
+  {
+    title: 'Payments',
+    href: '/warden/payments',
+    icon: CreditCard,
     roles: ['WARDEN', 'SUPER_ADMIN'],
   },
   {
@@ -61,10 +80,84 @@ const navItems: NavItem[] = [
     roles: ['WARDEN', 'SUPER_ADMIN'],
   },
   {
+    title: 'Security Sentinel',
+    href: '/warden/security-sentinel',
+    icon: Shield,
+    roles: ['WARDEN', 'SUPER_ADMIN'],
+  },
+  {
+    title: 'Profile',
+    href: '/warden/profile',
+    icon: User,
+    roles: ['WARDEN', 'SUPER_ADMIN'],
+  },
+  {
     title: '2FA Security',
-    href: '/mfa-setup',
+    href: '/warden/mfa-setup',
     icon: KeyRound,
-    roles: ['STUDENT', 'WARDEN', 'STAFF', 'SUPER_ADMIN'],
+    roles: ['WARDEN', 'SUPER_ADMIN'],
+  },
+
+  // Student Nav Items (10 Core Features including Messages!)
+  {
+    title: 'Rooms',
+    href: '/student/rooms',
+    icon: Building2,
+    roles: ['STUDENT'],
+  },
+  {
+    title: 'Bookings',
+    href: '/student/bookings',
+    icon: FileSpreadsheet,
+    roles: ['STUDENT'],
+  },
+  {
+    title: 'Roommate Match',
+    href: '/student/match',
+    icon: UserCheck,
+    roles: ['STUDENT'],
+  },
+  {
+    title: 'Tickets',
+    href: '/student/tickets',
+    icon: Ticket,
+    roles: ['STUDENT'],
+  },
+  {
+    title: 'Messages',
+    href: '/student/messages',
+    icon: MessageSquare,
+    roles: ['STUDENT'],
+  },
+  {
+    title: 'Marketplace',
+    href: '/student/marketplace',
+    icon: ShoppingBag,
+    roles: ['STUDENT'],
+  },
+  {
+    title: 'Payments',
+    href: '/student/payments',
+    icon: CreditCard,
+    roles: ['STUDENT'],
+  },
+  {
+    title: 'Help Center',
+    href: '/student/help',
+    icon: HelpCircle,
+    roles: ['STUDENT'],
+  },
+  {
+    title: 'Profile',
+    href: '/student/profile',
+    icon: User,
+    roles: ['STUDENT'],
+  },
+  {
+    title: '2FA Security',
+    href: '/student/mfa-setup',
+    icon: KeyRound,
+    roles: ['STUDENT'],
   },
 ];
 
@@ -78,12 +171,8 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="w-60 shrink-0 border-r border-zinc-800 bg-black hidden md:flex flex-col min-h-[calc(100vh-3.5rem)] p-3 justify-between">
+    <aside className="w-56 shrink-0 bg-[#EDEAFD] hidden md:flex flex-col min-h-[calc(100vh-4rem)] p-4 justify-between border-r border-[#E5E4E8]/60">
       <nav className="space-y-1">
-        <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 font-mono">
-          Menu
-        </div>
-
         {filteredItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -93,16 +182,16 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all',
+                'flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition-all',
                 isActive
-                  ? 'bg-zinc-800 text-white font-semibold'
-                  : 'text-zinc-400 hover:bg-zinc-900 hover:text-white',
+                  ? 'bg-[#ECE8FE] text-[#3C315B]'
+                  : 'text-[#3C315B]/70 hover:bg-white/60 hover:text-[#3C315B]',
               )}
             >
               <Icon
                 className={cn(
                   'h-4 w-4',
-                  isActive ? 'text-white' : 'text-zinc-400',
+                  isActive ? 'text-[#6A4FE0]' : 'text-[#3C315B]/50',
                 )}
               />
               <span>{item.title}</span>
@@ -111,12 +200,13 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-3 rounded-xl border border-zinc-800 bg-zinc-900/50 space-y-1 text-xs">
-        <div className="flex items-center gap-1.5 text-emerald-400 font-mono font-semibold text-[11px]">
-          <ShieldCheck className="h-3.5 w-3.5" /> RLS Isolation
+      {/* RLS Security Footer Card */}
+      <div className="p-4 rounded-2xl bg-white border border-[#E5E4E8] space-y-1 text-xs shadow-sm mt-4">
+        <div className="flex items-center gap-1.5 text-emerald-600 font-semibold text-[11px]">
+          <CheckCircle2 className="h-3.5 w-3.5" /> RLS Active
         </div>
-        <p className="text-[11px] text-zinc-500 leading-relaxed">
-          Tenant session isolated via Supabase PostgreSQL policy.
+        <p className="text-[11px] text-[#3C315B]/60 leading-relaxed font-normal">
+          Tenant-isolated PostgreSQL session.
         </p>
       </div>
     </aside>

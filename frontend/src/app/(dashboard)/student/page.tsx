@@ -8,19 +8,12 @@ import {
   Ticket,
   Users,
   ArrowRight,
-  ShieldCheck,
   Clock,
-  Sparkles,
-  Zap,
   ShoppingBag,
   CheckCircle2,
-  AlertCircle,
 } from 'lucide-react';
 import api from '@/lib/axios';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 export default function StudentDashboardPage() {
   const { user } = useAuthStore();
@@ -52,45 +45,50 @@ export default function StudentDashboardPage() {
   const pendingTickets = tickets?.filter((t: any) => t.status !== 'RESOLVED') || [];
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12">
-      {/* Welcome Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl p-8 border border-white/10 bg-gradient-to-r from-purple-900/40 via-indigo-900/30 to-card glass-card">
-        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-          <Sparkles className="h-64 w-64 text-purple-400" />
-        </div>
-
-        <div className="relative z-10 space-y-4 max-w-2xl">
+    <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
+      {/* Welcome Hero Banner Card — Light Lavender #ECE8FE */}
+      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-4 shadow-sm border border-[#E5E4E8]">
+        <div className="space-y-2 max-w-2xl">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="border-purple-500/40 text-purple-300 font-mono text-[10px] uppercase">
-              <Zap className="mr-1 h-3 w-3 text-cyan-400" /> Student Portal Active
-            </Badge>
-            <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 font-mono text-[10px]">
+            <span className="inline-block px-3 py-1 rounded-full bg-[#EDEAFD] text-[#3C315B] text-[11px] font-semibold tracking-wide">
+              Student Portal Active
+            </span>
+            <span className="inline-block px-3 py-1 rounded-full bg-[#E6F9F0] text-[#2EC08B] text-[11px] font-semibold tracking-wide">
               Tenant Isolated
-            </Badge>
+            </span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight gradient-text-glow">
+          <h1 className="text-3xl font-bold text-[#3C315B] tracking-tight">
             Welcome back, {user?.email?.split('@')[0]} 👋
           </h1>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-xs text-[#3C315B]/70 leading-relaxed font-normal">
             Manage room allocations, request maintenance support with SLA prediction, and find your ideal roommate.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link href="/student/tickets">
-              <Button className="gradient-brand hover:opacity-90 text-white font-semibold text-xs shadow-lg glow-purple">
-                <Ticket className="mr-1.5 h-3.5 w-3.5" /> Raise Ticket
-              </Button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-full bg-[#3C315B] hover:bg-[#2D2447] text-white font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <Ticket className="w-3.5 h-3.5 text-[#AB9FF2]" /> Raise Ticket
+              </button>
             </Link>
             <Link href="/student/match">
-              <Button variant="outline" className="border-white/15 hover:bg-white/5 text-xs">
-                <Users className="mr-1.5 h-3.5 w-3.5 text-purple-400" /> Match Roommates
-              </Button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-full bg-white text-[#3C315B] font-semibold text-xs border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                <Users className="w-3.5 h-3.5 text-[#6A4FE0]" /> Match Roommates
+              </button>
             </Link>
             <Link href="/student/marketplace">
-              <Button variant="outline" className="border-white/15 hover:bg-white/5 text-xs">
-                <ShoppingBag className="mr-1.5 h-3.5 w-3.5 text-cyan-400" /> Marketplace
-              </Button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-full bg-white text-[#3C315B] font-semibold text-xs border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                <ShoppingBag className="w-3.5 h-3.5 text-[#2EC08B]" /> Marketplace
+              </button>
             </Link>
           </div>
         </div>
@@ -99,40 +97,38 @@ export default function StudentDashboardPage() {
       {/* Grid Dashboard Widgets */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Active Booking Card */}
-        <Card className="glass-card glass-card-hover border-white/10 relative overflow-hidden flex flex-col justify-between">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-bold flex items-center gap-2">
-                <BedDouble className="h-5 w-5 text-purple-400" /> Active Room Allocation
-              </CardTitle>
-              <Badge variant={activeBooking ? 'success' : 'outline'}>
-                {activeBooking ? activeBooking.status : 'No Booking'}
-              </Badge>
-            </div>
-          </CardHeader>
+        <div className="rounded-3xl bg-white p-6 border border-[#E5E4E8] shadow-sm flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between border-b border-[#E5E4E8] pb-3">
+            <h3 className="text-base font-bold text-[#3C315B] flex items-center gap-2">
+              <BedDouble className="h-5 w-5 text-[#6A4FE0]" /> Active Room Allocation
+            </h3>
+            <span className="px-3 py-1 rounded-full bg-[#EDEAFD] text-[#3C315B] text-[11px] font-semibold">
+              {activeBooking ? activeBooking.status : 'No Booking'}
+            </span>
+          </div>
 
-          <CardContent className="space-y-4">
+          <div className="space-y-4">
             {loadingBooking ? (
-              <p className="text-xs text-muted-foreground py-6 text-center animate-pulse">
+              <p className="text-xs text-[#3C315B]/60 py-6 text-center">
                 Fetching allocation status...
               </p>
             ) : activeBooking ? (
               <div className="space-y-3">
-                <div className="p-4 rounded-2xl bg-card/60 border border-white/5 space-y-2">
+                <div className="p-4 rounded-2xl bg-[#FAFAFA] border border-[#E5E4E8] space-y-2">
                   <div className="flex items-baseline justify-between">
-                    <span className="text-xs text-muted-foreground font-mono">ROOM NUMBER</span>
-                    <span className="text-3xl font-extrabold text-white">
+                    <span className="text-[11px] text-[#3C315B]/50 font-semibold uppercase">ROOM NUMBER</span>
+                    <span className="text-3xl font-extrabold text-[#3C315B]">
                       Room {activeBooking.room?.roomNumber}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-white/5">
+                  <div className="flex items-center justify-between text-xs text-[#3C315B]/70 pt-1 border-t border-[#E5E4E8]">
                     <span>Floor {activeBooking.room?.floor}</span>
                     <span>Max Capacity: {activeBooking.room?.capacity} Beds</span>
                   </div>
                 </div>
 
-                <div className="text-xs font-mono text-purple-300 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center gap-2">
-                  <Clock className="h-4 w-4 shrink-0" />
+                <div className="text-xs text-[#3C315B] p-3 rounded-xl bg-[#ECE8FE] border border-[#AB9FF2]/40 flex items-center gap-2 font-medium">
+                  <Clock className="h-4 w-4 shrink-0 text-[#6A4FE0]" />
                   <span>
                     Valid: {new Date(activeBooking.startDate).toLocaleDateString()} —{' '}
                     {new Date(activeBooking.endDate).toLocaleDateString()}
@@ -141,33 +137,36 @@ export default function StudentDashboardPage() {
               </div>
             ) : (
               <div className="space-y-3 py-4 text-center">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[#3C315B]/60 font-medium">
                   You currently have no active room allocations reserved.
                 </p>
-                <Button size="sm" variant="secondary" className="w-full text-xs">
-                  Browse Available Hostels
-                </Button>
+                <Link href="/student/rooms">
+                  <button
+                    type="button"
+                    className="w-full py-2 rounded-xl bg-[#EDEAFD] text-[#3C315B] font-semibold text-xs hover:bg-[#D6CDFE] transition-colors"
+                  >
+                    Browse Available Hostels
+                  </button>
+                </Link>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Maintenance Tickets Summary */}
-        <Card className="glass-card glass-card-hover border-white/10 flex flex-col justify-between">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-bold flex items-center gap-2">
-                <Ticket className="h-5 w-5 text-purple-400" /> Maintenance Tickets
-              </CardTitle>
-              <Badge variant={pendingTickets.length > 0 ? 'warning' : 'outline'}>
-                {pendingTickets.length} Active
-              </Badge>
-            </div>
-          </CardHeader>
+        <div className="rounded-3xl bg-white p-6 border border-[#E5E4E8] shadow-sm flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between border-b border-[#E5E4E8] pb-3">
+            <h3 className="text-base font-bold text-[#3C315B] flex items-center gap-2">
+              <Ticket className="h-5 w-5 text-[#6A4FE0]" /> Maintenance Tickets
+            </h3>
+            <span className="px-3 py-1 rounded-full bg-[#EDEAFD] text-[#3C315B] text-[11px] font-semibold">
+              {pendingTickets.length} Active
+            </span>
+          </div>
 
-          <CardContent className="space-y-3">
+          <div className="space-y-3">
             {loadingTickets ? (
-              <p className="text-xs text-muted-foreground py-6 text-center animate-pulse">
+              <p className="text-xs text-[#3C315B]/60 py-6 text-center">
                 Loading support tickets...
               </p>
             ) : pendingTickets.length > 0 ? (
@@ -175,95 +174,96 @@ export default function StudentDashboardPage() {
                 {pendingTickets.slice(0, 2).map((t: any) => (
                   <div
                     key={t.id}
-                    className="p-3 rounded-xl bg-card/60 border border-white/5 flex items-center justify-between text-xs space-y-1"
+                    className="p-3 rounded-xl bg-[#FAFAFA] border border-[#E5E4E8] flex items-center justify-between text-xs"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold capitalize text-white">{t.category}</span>
+                        <span className="font-semibold capitalize text-[#3C315B]">{t.category}</span>
                         {t.breachRisk && (
-                          <Badge variant="destructive" className="text-[9px] px-1.5 py-0">
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-red-50 text-red-600 font-bold">
                             SLA Risk
-                          </Badge>
+                          </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-muted-foreground truncate max-w-[180px] pt-0.5">
+                      <p className="text-[11px] text-[#3C315B]/60 truncate max-w-[180px] pt-0.5">
                         {t.description}
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-300 shrink-0">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#EDEAFD] text-[#3C315B] font-semibold">
                       {t.status}
-                    </Badge>
+                    </span>
                   </div>
                 ))}
 
                 <Link
                   href="/student/tickets"
-                  className="text-xs text-purple-400 hover:text-purple-300 inline-flex items-center gap-1 pt-1 font-semibold"
+                  className="text-xs text-[#6A4FE0] hover:underline inline-flex items-center gap-1 pt-1 font-semibold"
                 >
                   View all tickets <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
             ) : (
               <div className="py-6 text-center space-y-2">
-                <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400/80" />
-                <p className="text-xs text-muted-foreground">No active maintenance issues reported.</p>
+                <CheckCircle2 className="mx-auto h-8 w-8 text-[#2EC08B]" />
+                <p className="text-xs text-[#3C315B]/60 font-medium">No active maintenance issues reported.</p>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Roommate Matches Summary */}
-        <Card className="glass-card glass-card-hover border-white/10 flex flex-col justify-between">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-bold flex items-center gap-2">
-                <Users className="h-5 w-5 text-purple-400" /> Vector Roommate Match
-              </CardTitle>
-              <Badge variant="secondary" className="font-mono text-[10px]">
-                Vector Engine
-              </Badge>
-            </div>
-          </CardHeader>
+        <div className="rounded-3xl bg-white p-6 border border-[#E5E4E8] shadow-sm flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between border-b border-[#E5E4E8] pb-3">
+            <h3 className="text-base font-bold text-[#3C315B] flex items-center gap-2">
+              <Users className="h-5 w-5 text-[#6A4FE0]" /> Vector Roommate Match
+            </h3>
+            <span className="px-3 py-1 rounded-full bg-[#EDEAFD] text-[#3C315B] text-[10px] font-semibold">
+              Vector Engine
+            </span>
+          </div>
 
-          <CardContent className="space-y-3">
+          <div className="space-y-3">
             {matches && matches.length > 0 ? (
               <div className="space-y-2.5">
                 {matches.slice(0, 2).map((m: any) => (
                   <div
                     key={m.userId}
-                    className="p-3 rounded-xl bg-card/60 border border-white/5 flex items-center justify-between text-xs"
+                    className="p-3 rounded-xl bg-[#FAFAFA] border border-[#E5E4E8] flex items-center justify-between text-xs"
                   >
                     <div>
-                      <p className="font-semibold text-white truncate max-w-[150px]">{m.email}</p>
-                      <p className="text-[11px] text-muted-foreground pt-0.5">
+                      <p className="font-semibold text-[#3C315B] truncate max-w-[150px]">{m.email}</p>
+                      <p className="text-[11px] text-[#3C315B]/60 pt-0.5">
                         {m.matchingTraits.length} Shared Lifestyle Traits
                       </p>
                     </div>
-                    <span className="font-extrabold text-base gradient-text-glow">{m.score}%</span>
+                    <span className="font-extrabold text-base text-[#6A4FE0]">{m.score}%</span>
                   </div>
                 ))}
 
                 <Link
                   href="/student/match"
-                  className="text-xs text-purple-400 hover:text-purple-300 inline-flex items-center gap-1 pt-1 font-semibold"
+                  className="text-xs text-[#6A4FE0] hover:underline inline-flex items-center gap-1 pt-1 font-semibold"
                 >
                   View full match rankings <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
             ) : (
               <div className="py-4 text-center space-y-3">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[#3C315B]/60 font-medium">
                   Set your habits to calculate real-time roommate compatibility scores.
                 </p>
                 <Link href="/student/match">
-                  <Button size="sm" variant="outline" className="w-full text-xs border-white/15">
+                  <button
+                    type="button"
+                    className="w-full py-2 rounded-xl bg-[#EDEAFD] text-[#3C315B] font-semibold text-xs hover:bg-[#D6CDFE] transition-colors"
+                  >
                     Configure Lifestyle Profile
-                  </Button>
+                  </button>
                 </Link>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

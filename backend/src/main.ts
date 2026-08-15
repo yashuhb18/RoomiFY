@@ -1,10 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
+import { join } from 'path';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
@@ -39,7 +41,7 @@ async function bootstrap() {
     ],
   });
 
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: winstonLogger,
     rawBody: true,
   });
@@ -48,16 +50,21 @@ async function bootstrap() {
   const frontendUrl = configService.get<string>('frontendUrl')!;
   const port = configService.get<number>('port') || 5000;
 
+  // Serve uploads static assets
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads/',
+  });
+
   // Helmet with strict CSP
   app.use(
     helmet({
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: ["'self'"],
-          styleSrc: ["'self'"],
-          imgSrc: ["'self'", 'data:', 'https:'],
-          connectSrc: ["'self'", frontendUrl],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'https:', 'http://localhost:5000', 'http://localhost:3001'],
+          connectSrc: ["'self'", frontendUrl, 'http://localhost:3001', 'http://localhost:3000', 'http://localhost:5000'],
           fontSrc: ["'self'"],
           objectSrc: ["'none'"],
           frameSrc: ["'none'"],
@@ -65,17 +72,22 @@ async function bootstrap() {
           formAction: ["'self'"],
         },
       },
-      crossOriginEmbedderPolicy: true,
-      crossOriginOpenerPolicy: true,
-      crossOriginResourcePolicy: { policy: 'same-site' },
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
       referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
       hsts: { maxAge: 31536000, includeSubDomains: true },
     }),
   );
 
-  // CORS — whitelist only
+  // CORS — allow all local origins seamlessly
   app.enableCors({
-    origin: [frontendUrl],
+    origin: (origin, callback) => {
+      if (!origin || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -103,7 +115,10 @@ async function bootstrap() {
   // API prefix
   app.setGlobalPrefix('api');
 
-  await app.listen(port);
+  // Enable shutdown hooks for graceful exit (e.g. Prisma disconnect)
+  app.enableShutdownHooks();
+
+  await app.listen(port, '0.0.0.0');
 
   winstonLogger.log({
     level: 'log',

@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Role, TicketStatus } from '@prisma/client';
 import { TicketsService } from './tickets.service';
@@ -24,7 +25,8 @@ export class TicketsController {
   ) {}
 
   @Post()
-  @Roles(Role.STUDENT)
+  @Roles(Role.STUDENT, Role.WARDEN, Role.SUPER_ADMIN)
+  @Throttle({ default: { limit: 10, ttl: 3600000 } }) // 10 tickets per hour max
   @UseInterceptors(FileInterceptor('photo', {
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
     fileFilter: (_req, file, cb) => {
@@ -66,8 +68,11 @@ export class TicketsController {
   }
 
   @Get(':id')
-  async findById(@Param('id', ParseUUIDPipe) id: string) {
-    return this.ticketsService.findById(id);
+  async findById(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.ticketsService.findById(id, user);
   }
 
   @Patch(':id/assign/:staffId')

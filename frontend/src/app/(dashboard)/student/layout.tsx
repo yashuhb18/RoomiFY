@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Navbar } from '@/components/common/Navbar';
 import { Sidebar } from '@/components/common/Sidebar';
-import { Footer } from '@/components/common/Footer';
 
 export default function StudentLayout({
   children,
@@ -16,21 +15,20 @@ export default function StudentLayout({
   const { user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (isAuthenticated && user?.role === 'WARDEN') {
+    if (isAuthenticated && (user?.role === 'WARDEN' || user?.role === 'SUPER_ADMIN')) {
       router.push('/warden');
     }
   }, [isAuthenticated, user, router]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-[#EDEAFD] flex flex-col">
       <Navbar />
-      <div className="flex flex-1">
+      <div className="flex flex-1 bg-[#EDEAFD]">
         <Sidebar />
-        <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full space-y-6">
+        <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full bg-[#EDEAFD] min-h-[calc(100vh-4rem)]">
           {children}
         </main>
       </div>
-      <Footer />
     </div>
   );
 }

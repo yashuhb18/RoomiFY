@@ -14,13 +14,13 @@ import { Role } from '@prisma/client';
 import { MarketplaceService } from './marketplace.service';
 import { CreateListingDto, BuyItemDto } from './dto/create-listing.dto';
 import { CurrentUser, JwtPayload, Roles } from '../../common/decorators';
-import { SupabaseService } from '../supabase/supabase.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Controller('marketplace')
 export class MarketplaceController {
   constructor(
     private readonly marketplaceService: MarketplaceService,
-    private readonly supabaseService: SupabaseService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   @Post('listings')
@@ -41,7 +41,8 @@ export class MarketplaceController {
   ) {
     let imageUrl: string | undefined;
     if (image) {
-      imageUrl = await this.supabaseService.uploadFile(image, 'marketplace');
+      const result = await this.cloudinaryService.uploadImage(image, 'marketplace');
+      imageUrl = result.secureUrl;
     }
 
     return this.marketplaceService.createListing(
@@ -73,6 +74,16 @@ export class MarketplaceController {
       user.sub,
       user.hostelId,
     );
+  }
+
+  @Post('verify-payment')
+  @Roles(Role.STUDENT)
+  async verifyPayment(
+    @Body('razorpay_order_id') orderId: string,
+    @Body('razorpay_payment_id') paymentId: string,
+    @Body('razorpay_signature') signature: string,
+  ) {
+    return this.marketplaceService.verifyPayment(orderId, paymentId, signature);
   }
 
   @Delete('listings/:id')

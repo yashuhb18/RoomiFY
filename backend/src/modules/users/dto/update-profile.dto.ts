@@ -1,53 +1,49 @@
-import { IsOptional, IsString, IsEnum } from 'class-validator';
+import { IsOptional, IsEnum, IsInt, Min, Max } from 'class-validator';
 
-export enum SleepSchedule {
-  EARLY_BIRD = 'early_bird',
-  NIGHT_OWL = 'night_owl',
-  FLEXIBLE = 'flexible',
+// ─── Symbiotic Strain Model – Enums ──────────────────────────────────────────
+
+export enum PeakEnergyWindow {
+  DAWN     = 'dawn',      // 5 AM – 9 AM
+  MIDDAY   = 'midday',    // 10 AM – 2 PM
+  DUSK     = 'dusk',      // 5 PM – 9 PM
+  MIDNIGHT = 'midnight',  // 10 PM – 2 AM
 }
 
-export enum CleanlinessLevel {
-  VERY_CLEAN = 'very_clean',
-  MODERATE = 'moderate',
-  RELAXED = 'relaxed',
+export enum FinancialSplitStyle {
+  EQUAL_SPLIT  = 'equal_split',   // Bill divided by N
+  EXACT_USAGE  = 'exact_usage',   // I pay for what I consume
 }
 
-export enum StudyStyle {
-  SILENT = 'silent',
-  BACKGROUND_NOISE = 'background_noise',
-  GROUP_STUDY = 'group_study',
+export enum GuestPhilosophy {
+  SOCIAL_HUB       = 'social_hub',       // Home is a Social Hub
+  PRIVATE_FORTRESS = 'private_fortress', // Home is a Private Fortress
 }
 
-export enum SmokingPreference {
-  NON_SMOKER = 'non_smoker',
-  SMOKER = 'smoker',
-  OUTDOOR_ONLY = 'outdoor_only',
-}
-
-export enum MusicPreference {
-  HEADPHONES = 'headphones',
-  SPEAKERS = 'speakers',
-  NO_MUSIC = 'no_music',
-}
+// ─── DTO ─────────────────────────────────────────────────────────────────────
 
 export class UpdateProfileDto {
+  /** Dominant active period of the day */
   @IsOptional()
-  @IsEnum(SleepSchedule)
-  sleepSchedule?: SleepSchedule;
+  @IsEnum(PeakEnergyWindow)
+  peakEnergyWindow?: PeakEnergyWindow;
 
+  /**
+   * 1 = fully open (snacks/charger shared freely)
+   * 10 = strictly zoned (keep off my shelf)
+   */
   @IsOptional()
-  @IsEnum(CleanlinessLevel)
-  cleanliness?: CleanlinessLevel;
+  @IsInt()
+  @Min(1)
+  @Max(10)
+  territoriality?: number;
 
+  /** How bills and shared costs are handled */
   @IsOptional()
-  @IsEnum(StudyStyle)
-  studyStyle?: StudyStyle;
+  @IsEnum(FinancialSplitStyle)
+  financialSplitStyle?: FinancialSplitStyle;
 
+  /** Attitude toward having guests over */
   @IsOptional()
-  @IsEnum(SmokingPreference)
-  smoking?: SmokingPreference;
-
-  @IsOptional()
-  @IsEnum(MusicPreference)
-  music?: MusicPreference;
+  @IsEnum(GuestPhilosophy)
+  guestPhilosophy?: GuestPhilosophy;
 }
