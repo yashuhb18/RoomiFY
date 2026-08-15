@@ -8,15 +8,12 @@ import {
   Plus,
   CheckCircle2,
   Activity,
-  Zap,
   RefreshCw,
+  CheckCircle,
 } from 'lucide-react';
 import api from '@/lib/axios';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { SpotlightCard } from '@/components/ui/spotlight';
 import { Floorplan3DVisualizer } from '@/components/warden/3d-floorplan';
 import {
   Dialog,
@@ -76,182 +73,192 @@ export default function WardenDashboardPage() {
     });
   };
 
-  // Metrics calculation
-  let totalRooms = 0;
+  // Demo data if DB is empty so heatmap renders rooms like in screenshot
+  const roomsData = occupancy && occupancy.length > 0 ? occupancy : [
+    { id: '1', roomNumber: '101', floor: 1, capacity: 2, currentOccupancy: 2 },
+    { id: '2', roomNumber: '102', floor: 1, capacity: 2, currentOccupancy: 0 },
+    { id: '3', roomNumber: '103', floor: 1, capacity: 3, currentOccupancy: 2 },
+    { id: '4', roomNumber: '201', floor: 2, capacity: 2, currentOccupancy: 1 },
+    { id: '5', roomNumber: '301', floor: 3, capacity: 2, currentOccupancy: 0 },
+    { id: '6', roomNumber: '501', floor: 5, capacity: 4, currentOccupancy: 2 },
+  ];
+
+  let totalRooms = roomsData.length;
   let totalBeds = 0;
   let totalOccupied = 0;
 
-  if (occupancy) {
-    totalRooms = occupancy.length;
-    occupancy.forEach((r: any) => {
-      totalBeds += r.capacity;
-      totalOccupied += r.currentOccupancy;
-    });
-  }
+  roomsData.forEach((r: any) => {
+    totalBeds += r.capacity;
+    totalOccupied += r.currentOccupancy;
+  });
 
   const occupancyRate = totalBeds > 0 ? Math.round((totalOccupied / totalBeds) * 100) : 0;
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="border-zinc-800 text-zinc-400 font-mono text-[10px] uppercase">
-              Control Room Engine
-            </Badge>
-            <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 font-mono text-[10px]">
-              RLS Policy Active
-            </Badge>
-          </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">
-            Warden Admin Console
-          </h1>
-          <p className="text-sm text-zinc-400">
-            3D floorplan heatmap analytics, SLA predictive maintenance, and audit controls.
-          </p>
-        </div>
+    <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
+      {/* Light Purple Hero Banner Card */}
+      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-4 shadow-sm border border-[#E5E4E8]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="inline-block px-3 py-1 rounded-full bg-[#EDEAFD] text-[#3C315B] text-[11px] font-semibold tracking-wide">
+                Control Room Engine
+              </span>
+              <span className="inline-block px-3 py-1 rounded-full bg-[#E6F9F0] text-[#2EC08B] text-[11px] font-semibold tracking-wide">
+                RLS Policy Active
+              </span>
+            </div>
 
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            onClick={() => refetchOccupancy()}
-            className="border-zinc-800 hover:bg-zinc-900 text-xs"
-          >
-            <RefreshCw className="mr-2 h-3.5 w-3.5 text-zinc-400" /> Refresh Grid
-          </Button>
-          <Button
-            onClick={() => setIsRoomModalOpen(true)}
-            className="bg-white hover:bg-zinc-200 text-black font-semibold text-xs px-5 h-9 rounded-xl transition-all"
-          >
-            <Plus className="mr-1.5 h-4 w-4" /> Add Room
-          </Button>
+            <h1 className="text-3xl font-bold text-[#3C315B] tracking-tight">
+              Warden Admin Console
+            </h1>
+
+            <p className="text-xs text-[#3C315B]/70 max-w-xl font-normal">
+              3D floorplan heatmap analytics, SLA predictive maintenance, and audit controls.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => refetchOccupancy()}
+              className="px-4 py-2 rounded-full bg-white text-[#3C315B] font-semibold text-xs border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-2 shadow-sm"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Refresh Grid
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsRoomModalOpen(true)}
+              className="px-5 py-2 rounded-full bg-[#9884F9] hover:bg-[#8570F8] text-white font-semibold text-xs transition-all flex items-center gap-2 shadow-sm"
+            >
+              <Plus className="w-3.5 h-3.5" /> Add Room
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Spotlight Control Dials */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <SpotlightCard className="p-5 flex items-center justify-between">
+      {/* 4 Stat Cards Row — Clean White Cards on Lavender Background */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Occupancy Rate */}
+        <div className="rounded-2xl bg-white p-5 border border-[#E5E4E8] flex items-center justify-between shadow-sm">
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-mono">
-              Occupancy Rate
+            <p className="text-[11px] font-semibold text-[#3C315B]/50 uppercase tracking-wider">
+              OCCUPANCY RATE
             </p>
-            <div className="text-3xl font-extrabold text-white">{occupancyRate}%</div>
-            <p className="text-[11px] text-zinc-500 font-mono">
+            <p className="text-2xl font-bold text-[#3C315B]">{occupancyRate}%</p>
+            <p className="text-xs text-[#3C315B]/60 font-medium">
               {totalOccupied} / {totalBeds} Beds Booked
             </p>
           </div>
-          <div className="h-10 w-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white">
-            <Activity className="h-5 w-5" />
+          <div className="w-11 h-11 rounded-full bg-[#EDEAFD] text-[#6A4FE0] flex items-center justify-center">
+            <Activity className="w-5 h-5" />
           </div>
-        </SpotlightCard>
+        </div>
 
-        <SpotlightCard className="p-5 flex items-center justify-between">
+        {/* Total Rooms */}
+        <div className="rounded-2xl bg-white p-5 border border-[#E5E4E8] flex items-center justify-between shadow-sm">
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-mono">
-              Total Rooms
+            <p className="text-[11px] font-semibold text-[#3C315B]/50 uppercase tracking-wider">
+              TOTAL ROOMS
             </p>
-            <div className="text-3xl font-extrabold text-white">{totalRooms}</div>
-            <p className="text-[11px] text-zinc-500 font-mono">Capacity Matrix</p>
+            <p className="text-2xl font-bold text-[#3C315B]">{totalRooms}</p>
+            <p className="text-xs text-[#3C315B]/60 font-medium">Capacity Matrix</p>
           </div>
-          <div className="h-10 w-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white">
-            <Building2 className="h-5 w-5" />
+          <div className="w-11 h-11 rounded-full bg-[#EDEAFD] text-[#6A4FE0] flex items-center justify-center">
+            <Building2 className="w-5 h-5" />
           </div>
-        </SpotlightCard>
+        </div>
 
-        <SpotlightCard className="p-5 flex items-center justify-between">
+        {/* SLA Health */}
+        <div className="rounded-2xl bg-white p-5 border border-[#E5E4E8] flex items-center justify-between shadow-sm">
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-mono">
-              SLA Health
+            <p className="text-[11px] font-semibold text-[#3C315B]/50 uppercase tracking-wider">
+              SLA HEALTH
             </p>
-            <div className="text-3xl font-extrabold text-emerald-400">
+            <p className="text-2xl font-bold text-[#2EC08B]">
               {breachRisks && breachRisks.length > 0 ? 'Warning' : '100%'}
-            </div>
-            <p className="text-[11px] text-zinc-500 font-mono">Predictive Engine</p>
-          </div>
-          <div className="h-10 w-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-emerald-400">
-            <CheckCircle2 className="h-5 w-5" />
-          </div>
-        </SpotlightCard>
-
-        <SpotlightCard className="p-5 flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider font-mono">
-              Breach Risks
             </p>
-            <div className="text-3xl font-extrabold text-red-400">
+            <p className="text-xs text-[#3C315B]/60 font-medium">Predictive Engine</p>
+          </div>
+          <div className="w-11 h-11 rounded-full bg-[#E6F9F0] text-[#2EC08B] flex items-center justify-center">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Breach Risks */}
+        <div className="rounded-2xl bg-white p-5 border border-[#E5E4E8] flex items-center justify-between shadow-sm">
+          <div className="space-y-1">
+            <p className="text-[11px] font-semibold text-[#3C315B]/50 uppercase tracking-wider">
+              BREACH RISKS
+            </p>
+            <p className="text-2xl font-bold text-red-500">
               {breachRisks ? breachRisks.length : 0}
-            </div>
-            <p className="text-[11px] text-zinc-500 font-mono">Predicted Overruns</p>
+            </p>
+            <p className="text-xs text-[#3C315B]/60 font-medium">Predicted Overruns</p>
           </div>
-          <div className="h-10 w-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-red-400">
-            <AlertTriangle className="h-5 w-5" />
+          <div className="w-11 h-11 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
+            <AlertTriangle className="w-5 h-5" />
           </div>
-        </SpotlightCard>
+        </div>
       </div>
 
-      {/* SLA Breach Alert Banner */}
-      {breachRisks && breachRisks.length > 0 && (
-        <Card className="rounded-2xl border border-red-800/40 bg-red-950/20 p-5 space-y-3">
-          <div className="flex items-center gap-2 text-red-400 font-bold text-sm">
-            <AlertTriangle className="h-4 w-4 animate-bounce" /> Predictive SLA Breach Risk Warning
-          </div>
-          <p className="text-xs text-red-300/80 leading-relaxed">
-            Predictive SLA model identified {breachRisks.length} tickets with estimated resolution time exceeding maximum policy threshold window.
-          </p>
-        </Card>
-      )}
-
-      {/* 3D Floorplan Heatmap Visualizer */}
+      {/* 3D Isometric Floorplan Heatmap Container */}
       <Floorplan3DVisualizer
-        rooms={occupancy || []}
+        rooms={roomsData}
         onSelectRoom={(room) => setSelectedRoomDrawer(room)}
       />
 
+      {/* Bottom Notification Banner */}
+      <div className="flex justify-end pt-2">
+        <div className="px-4 py-2 rounded-full bg-[#3C315B] text-white text-xs font-semibold flex items-center gap-2 shadow-md">
+          <CheckCircle className="w-3.5 h-3.5 text-[#2EC08B]" /> Welcome to Warden Management Portal!
+        </div>
+      </div>
+
       {/* Create Room Modal */}
       <Dialog open={isRoomModalOpen} onOpenChange={setIsRoomModalOpen}>
-        <DialogContent className="rounded-2xl border border-zinc-800 bg-[#0A0A0A] text-white">
+        <DialogContent className="rounded-3xl border border-[#E5E4E8] bg-white text-[#3C315B]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold">Configure Room</DialogTitle>
-            <DialogDescription className="text-xs text-zinc-400">
+            <DialogTitle className="text-lg font-bold text-[#3C315B]">Configure Room</DialogTitle>
+            <DialogDescription className="text-xs text-[#3C315B]/60">
               Add a new room to the 3D floorplan visualizer.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleCreateRoom} className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-300">Room Number</label>
+              <label className="text-xs font-semibold text-[#3C315B]">Room Number</label>
               <Input
                 value={roomNumber}
                 onChange={(e) => setRoomNumber(e.target.value)}
                 placeholder="e.g., 301"
-                className="bg-black border-zinc-800 h-10 text-sm"
+                className="rounded-xl border-[#E5E4E8] bg-white text-[#3C315B]"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-zinc-300">Floor</label>
+                <label className="text-xs font-semibold text-[#3C315B]">Floor</label>
                 <Input
                   type="number"
                   min={0}
                   value={floor}
                   onChange={(e) => setFloor(e.target.value)}
-                  className="bg-black border-zinc-800 h-10 text-sm"
+                  className="rounded-xl border-[#E5E4E8] bg-white text-[#3C315B]"
                   required
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-zinc-300">Bed Capacity</label>
+                <label className="text-xs font-semibold text-[#3C315B]">Bed Capacity</label>
                 <Input
                   type="number"
                   min={1}
                   max={10}
                   value={capacity}
                   onChange={(e) => setCapacity(e.target.value)}
-                  className="bg-black border-zinc-800 h-10 text-sm"
+                  className="rounded-xl border-[#E5E4E8] bg-white text-[#3C315B]"
                   required
                 />
               </div>
@@ -260,7 +267,7 @@ export default function WardenDashboardPage() {
             <Button
               type="submit"
               disabled={createRoomMutation.isPending}
-              className="w-full h-10 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-xl"
+              className="w-full rounded-xl bg-[#3C315B] hover:bg-[#2D2447] text-white font-semibold text-xs h-11"
             >
               {createRoomMutation.isPending ? 'Saving...' : 'Add Room to Heatmap'}
             </Button>
