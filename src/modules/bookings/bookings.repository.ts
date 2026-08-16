@@ -44,13 +44,39 @@ export class BookingsRepository {
   }
 
   async findActiveByStudent(studentId: string) {
-    return this.prisma.booking.findFirst({
+    const booking = await this.prisma.booking.findFirst({
       where: {
         studentId,
-        status: { in: [BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN] },
+        status: { in: [BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN] },
       },
       include: { room: true },
+      orderBy: { createdAt: 'desc' },
     });
+
+    if (booking) return booking;
+
+    const allocation = await this.prisma.allocation.findFirst({
+      where: {
+        studentId,
+        status: { in: ['ALLOCATED' as any, 'CHECKED_IN' as any] },
+      },
+      include: { room: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (allocation) {
+      return {
+        id: allocation.id,
+        roomId: allocation.roomId,
+        studentId: allocation.studentId,
+        startDate: allocation.createdAt,
+        endDate: allocation.updatedAt,
+        status: allocation.status,
+        room: allocation.room,
+      };
+    }
+
+    return null;
   }
 
   async updateStatus(id: string, status: BookingStatus, additionalData?: Prisma.BookingUpdateInput) {

@@ -13,6 +13,24 @@ export class MessagesController {
     return this.messagesService.getWardenContact(user.hostelId);
   }
 
+  @Get('my-conversation')
+  async getMyConversation(@CurrentUser() user: JwtPayload) {
+    const warden = await this.messagesService.getWardenContact(user.hostelId);
+    return this.messagesService.getConversation(user.sub, warden.id);
+  }
+
+  @Post('to-warden')
+  async sendToWarden(
+    @Body() body: { content: string },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const warden = await this.messagesService.getWardenContact(user.hostelId);
+    return this.messagesService.sendMessage(user.sub, user.hostelId, {
+      receiverId: warden.id,
+      content: body.content,
+    });
+  }
+
   @Post()
   async sendMessage(
     @Body() dto: SendMessageDto,

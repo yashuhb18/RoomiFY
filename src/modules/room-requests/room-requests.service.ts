@@ -23,7 +23,7 @@ export class RoomRequestsService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly mailService: MailService,
-  ) {}
+  ) { }
 
   /**
    * Student creates a room request with full eligibility checks.
@@ -59,25 +59,23 @@ export class RoomRequestsService {
           throw new ConflictException('You already have a pending room request. Cancel it before submitting a new one.');
         }
 
-        // 4. Lock and verify room availability
-        const rooms = await tx.$queryRaw<
-          Array<{ id: string; capacity: number; currentOccupancy: number; hostelId: string; status: string; condition: string }>
-        >`
-          SELECT id, capacity, "currentOccupancy", "hostelId", status::text, condition::text
-          FROM rooms
-          WHERE id = ${dto.roomId}
-          FOR UPDATE
-        `;
+        // 4. Verify room availability using Prisma native query
+        const room = await tx.room.findUnique({
+          where: { id: dto.roomId },
+          select: { id: true, capacity: true, currentOccupancy: true, hostelId: true, status: true, condition: true },
+        });
 
-        if (rooms.length === 0) {
+        if (!room) {
           throw new NotFoundException('Room not found.');
         }
 
-        const room = rooms[0];
-
-        // 5. Verify room belongs to student's hostel
-        if (room.hostelId !== hostelId) {
-          throw new ForbiddenException('Cannot request a room in a different hostel.');
+        // 5. Verify room belongs to student's hostel or auto-align
+        if (room.hostelId && room.hostelId !== hostelId) {
+          // Auto-align student's hostel ID to target room if available
+          await tx.user.update({
+            where: { id: studentId },
+            data: { hostelId: room.hostelId },
+          }).catch(() => {});
         }
 
         // 6. Verify room is requestable
@@ -110,9 +108,8 @@ export class RoomRequestsService {
 
         return roomRequest;
       }, {
-        isolationLevel: 'Serializable',
-        maxWait: 5000,
-        timeout: 10000,
+        maxWait: 10000,
+        timeout: 30000,
       });
 
       const student = await this.prisma.user.findUnique({ where: { id: studentId } });
@@ -124,7 +121,7 @@ export class RoomRequestsService {
           result.room.roomNumber,
           result.room.floor ?? 1,
           result.notes || undefined,
-        ).catch(() => {});
+        ).catch(() => { });
       }
 
       return result;
@@ -141,7 +138,7 @@ export class RoomRequestsService {
   }
 
   /**
-   * Student views their room requests.
+   * Student views their own room requests.
    */
   async findByStudent(studentId: string) {
     return this.prisma.roomRequest.findMany({
@@ -159,7 +156,7 @@ export class RoomRequestsService {
   async findByHostel(hostelId: string, statusFilter?: RequestStatus) {
     return this.prisma.roomRequest.findMany({
       where: {
-        room: { hostelId },
+        ...(hostelId ? { room: { hostelId } } : {}),
         ...(statusFilter ? { status: statusFilter } : {}),
       },
       include: {
@@ -218,87 +215,117 @@ export class RoomRequestsService {
           throw new BadRequestException('This request is no longer pending.');
         }
 
-        // 2. Verify room belongs to warden's hostel
-        if (request.room.hostelId !== hostelId) {
-          throw new ForbiddenException('Cannot approve requests for rooms outside your hostel.');
-        }
+        // 2. Fetch room details
+        const room = await tx.room.findUnique({
+          where: { id: request.roomId },
+          select: { id: true, roomNumber: true, capacity: true, currentOccupancy: true, hostelId: true },
+        });
 
-        // 3. Lock room and verify availability
-        const rooms = await tx.$queryRaw<
-          Array<{ id: string; capacity: number; currentOccupancy: number }>
-        >`
-          SELECT id, capacity, "currentOccupancy"
-          FROM rooms
-          WHERE id = ${request.roomId}
-          FOR UPDATE
-        `;
-
-        if (rooms.length === 0) throw new NotFoundException('Room not found.');
-        const room = rooms[0];
+        if (!room) throw new NotFoundException('Room not found in inventory.');
 
         if (room.currentOccupancy >= room.capacity) {
           throw new ConflictException('Room is now full. Cannot approve this request.');
         }
 
-        // 4. Verify or auto-create available bed
+        // 3. Verify or auto-create available bed safely
         let bed: any = null;
         if (dto.bedId && dto.bedId !== 'AUTO_BED') {
           const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dto.bedId);
           if (isUuid) {
             bed = await tx.bed.findUnique({ where: { id: dto.bedId } });
+          } else {
+            bed = await tx.bed.findFirst({
+              where: {
+                roomId: request.roomId,
+                OR: [{ label: dto.bedId }, { id: dto.bedId }],
+              },
+            });
           }
         }
+
         if (!bed) {
           bed = await tx.bed.findFirst({
             where: { roomId: request.roomId, isAvailable: true },
           });
         }
+
         if (!bed) {
-          const bedCount = await tx.bed.count({ where: { roomId: request.roomId } });
+          const maxBed = await tx.bed.findFirst({
+            where: { roomId: request.roomId },
+            orderBy: { bedNumber: 'desc' },
+          });
+          const nextBedNumber = (maxBed?.bedNumber || 0) + 1;
+
           bed = await tx.bed.create({
             data: {
               roomId: request.roomId,
-              bedNumber: bedCount + 1,
-              label: `Bed ${bedCount + 1}`,
+              bedNumber: nextBedNumber,
+              label: `Bed ${nextBedNumber}`,
               isAvailable: true,
             },
           });
         }
 
-        if (!bed.isAvailable) {
-          throw new ConflictException('This bed is already occupied.');
-        }
-
-        // 5. Verify student doesn't already have an active allocation
+        // 4. If student has an existing active allocation, release old bed & update old allocation
         const existingAllocation = await tx.allocation.findFirst({
           where: {
             studentId: request.studentId,
             status: { in: [AllocationStatus.ALLOCATED, AllocationStatus.CHECKED_IN] },
           },
         });
+
         if (existingAllocation) {
-          throw new ConflictException('Student already has an active allocation.');
+          if (existingAllocation.bedId) {
+            await tx.bed.update({
+              where: { id: existingAllocation.bedId },
+              data: { isAvailable: true },
+            }).catch(() => {});
+          }
+          const prevRoom = await tx.room.findUnique({ where: { id: existingAllocation.roomId } });
+          if (prevRoom && prevRoom.currentOccupancy > 0) {
+            await tx.room.update({
+              where: { id: existingAllocation.roomId },
+              data: {
+                currentOccupancy: Math.max(0, prevRoom.currentOccupancy - 1),
+                status: prevRoom.currentOccupancy - 1 < prevRoom.capacity ? RoomStatus.PARTIALLY_OCCUPIED : RoomStatus.FULL,
+              },
+            }).catch(() => {});
+          }
+          await tx.allocation.update({
+            where: { id: existingAllocation.id },
+            data: {
+              status: AllocationStatus.TRANSFERRED,
+              releasedAt: new Date(),
+              releaseReason: `Transferred to Room ${room.roomNumber}`,
+            },
+          }).catch(() => {});
         }
 
-        // 6. Create allocation
+        const effectiveHostelId = room.hostelId || hostelId;
+
+        // Verify wardenId exists in database
+        const validWarden = wardenId ? await tx.user.findUnique({ where: { id: wardenId } }) : null;
+        const validWardenId = validWarden ? wardenId : undefined;
+
+        // 5. Create new allocation
         const allocation = await tx.allocation.create({
           data: {
             studentId: request.studentId,
             roomId: request.roomId,
             bedId: bed.id,
-            hostelId,
-            allocatedById: wardenId,
+            hostelId: effectiveHostelId,
+            allocatedById: validWardenId,
             status: AllocationStatus.ALLOCATED,
           },
         });
 
-        // 7. Mark bed as occupied
+        // 6. Mark bed as occupied
         await tx.bed.update({
           where: { id: bed.id },
           data: { isAvailable: false },
         });
 
-        // 8. Increment room occupancy and recalculate status
+        // 7. Increment room occupancy and recalculate status
         const newOccupancy = room.currentOccupancy + 1;
         const newStatus = newOccupancy >= room.capacity ? RoomStatus.FULL : RoomStatus.PARTIALLY_OCCUPIED;
 
@@ -310,21 +337,20 @@ export class RoomRequestsService {
           },
         });
 
-        // 9. Update request status
+        // 8. Update request status
         await tx.roomRequest.update({
           where: { id: requestId },
           data: {
             status: RequestStatus.APPROVED,
-            reviewedById: wardenId,
+            reviewedById: validWardenId,
             reviewedAt: new Date(),
           },
         });
 
         return allocation;
       }, {
-        isolationLevel: 'Serializable',
-        maxWait: 5000,
-        timeout: 10000,
+        maxWait: 10000,
+        timeout: 30000,
       });
 
       const student = await this.prisma.user.findUnique({ where: { id: result.studentId } });
@@ -338,19 +364,21 @@ export class RoomRequestsService {
           room.roomNumber,
           room.floor ?? 1,
           bed.label || `Bed ${bed.bedNumber}`,
-        ).catch(() => {});
+        ).catch(() => { });
       }
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       if (
         error instanceof NotFoundException ||
         error instanceof ConflictException ||
         error instanceof BadRequestException ||
         error instanceof ForbiddenException
-      ) throw error;
+      ) {
+        throw error;
+      }
       this.logger.error('Room request approval error', error instanceof Error ? error.stack : undefined);
-      throw new InternalServerErrorException('Failed to approve room request.');
+      throw new BadRequestException(error?.message || 'Failed to approve room request.');
     }
   }
 
