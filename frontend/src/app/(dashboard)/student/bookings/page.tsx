@@ -42,16 +42,22 @@ export default function StudentBookingsPage() {
 
   const cancelBookingMutation = useMutation({
     mutationFn: async (bookingId: string) => {
-      const res = await api.patch(`/bookings/${bookingId}/cancel`);
-      return res.data;
+      try {
+        const res = await api.patch(`/bookings/${bookingId}/cancel`);
+        return res.data;
+      } catch (err) {
+        const res = await api.delete(`/room-requests/${bookingId}`);
+        return res.data;
+      }
     },
     onSuccess: () => {
-      toast.success('Booking cancelled successfully.');
+      toast.success('Reservation / Room request cancelled successfully.');
       queryClient.invalidateQueries({ queryKey: ['activeBooking'] });
       queryClient.invalidateQueries({ queryKey: ['myBookings'] });
+      queryClient.invalidateQueries({ queryKey: ['myRoomRequests'] });
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.message || 'Failed to cancel booking.');
+      toast.error(err.response?.data?.message || 'Failed to cancel reservation.');
     },
   });
 
