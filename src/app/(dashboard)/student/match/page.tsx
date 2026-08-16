@@ -49,7 +49,7 @@ export default function RoommateMatchPage() {
   const { data: myProfile } = useQuery({
     queryKey: ['myProfile'],
     queryFn: async () => {
-      const res = await api.get('/users/me');
+      const res = await api.get('/users/profile');
       if (res.data?.profile) {
         setProfileForm((prev) => ({
           ...prev,
