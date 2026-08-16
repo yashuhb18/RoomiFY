@@ -1,11 +1,15 @@
 # dependencies
+node_modules
+node_modules/
 /node_modules
-/.pnpm-store
+.pnpm-store
 
 # Next.js build output
-/.next/
-/out/
-/build
+.next
+.next/
+/.next
+out/
+build
 
 # Environment files
 .env

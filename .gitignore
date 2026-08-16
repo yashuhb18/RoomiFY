@@ -1,10 +1,15 @@
 # dependencies
 node_modules
+node_modules/
+/node_modules
 .pnpm-store
 
 # Next.js build output
+.next
 .next/
+/.next
 out/
+build
 
 # NestJS build output
 dist/
