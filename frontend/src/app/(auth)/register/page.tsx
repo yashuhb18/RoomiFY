@@ -22,6 +22,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import api from '@/lib/axios';
+import { Logo } from '@/components/common/logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -116,57 +117,68 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center p-4 bg-[#0A0A0A] overflow-hidden">
-      {/* Background Animated Orbs */}
-      <div className="absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-purple-600/15 blur-[150px] animate-float" />
-      <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-pink-600/15 blur-[150px] animate-float style={{ animationDelay: '-5s' }}" />
+    <div className="min-h-screen bg-[#EDEAFD] flex flex-col">
+      {/* Hero band */}
+      <div className="relative overflow-hidden bg-[#3C315B] pt-12 pb-24 px-6 md:px-12">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[400px] rounded-full bg-[#AB9FF2]/20 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-xl space-y-6">
-        {/* Branding */}
-        <div className="text-center space-y-2">
-          <Link href="/" className="inline-flex items-center gap-2 group">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/25 transition-transform group-hover:scale-105">
-              <Shield className="h-6 w-6 text-white" />
-            </div>
-            <span className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
-              ROOMIFY
-            </span>
-          </Link>
-          <p className="text-xs text-muted-foreground font-mono uppercase tracking-widest">
-            Step {step} of 3 &bull; Student Account Creation
+        <div className="relative z-10 max-w-[500px] mx-auto text-center space-y-4">
+          <div className="flex justify-center pb-2">
+            <Logo size="lg" variant="dark" href="/" />
+          </div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-[32px] md:text-[42px] font-sans font-bold tracking-tight leading-[1] text-white"
+          >
+            Create Resident Account
+          </motion.h1>
+
+          <p className="text-xs text-white/70 font-normal">
+            Step {step} of 3 &bull; Student Registration &amp; Roommate Profiling
           </p>
         </div>
+      </div>
 
-        {/* Step Progress Indicators */}
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map((s) => (
-            <div
-              key={s}
-              className={`h-1.5 rounded-full transition-all duration-500 ${
-                s <= step ? 'bg-gradient-to-r from-purple-600 to-pink-500 shadow-sm shadow-purple-500/50' : 'bg-white/10'
-              }`}
-            />
-          ))}
-        </div>
+      {/* Main Card */}
+      <div className="relative z-10 max-w-[520px] mx-auto px-4 -mt-12 w-full pb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="space-y-4"
+        >
+          {/* Step Progress Indicators */}
+          <div className="grid grid-cols-3 gap-2">
+            {[1, 2, 3].map((s) => (
+              <div
+                key={s}
+                className={`h-1.5 rounded-full transition-all duration-500 ${
+                  s <= step ? 'bg-[#6A4FE0] shadow-sm' : 'bg-white/60'
+                }`}
+              />
+            ))}
+          </div>
 
-        {/* Form Card */}
-        <Card className="rounded-3xl border border-white/10 bg-[#1A1A1A]/80 backdrop-blur-xl shadow-2xl overflow-hidden">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl font-bold">
-              {step === 1 && 'Credentials Setup'}
-              {step === 2 && 'Personal Information'}
-              {step === 3 && 'Behavioral Lifestyle Matching'}
-            </CardTitle>
-            <CardDescription className="text-xs text-muted-foreground">
-              {step === 1 && 'Create a secure password with Argon2id protection.'}
-              {step === 2 && 'Enter your contact info for hostel resident records.'}
-              {step === 3 && 'Calibrate your profile for algorithmic roommate matching.'}
-            </CardDescription>
-          </CardHeader>
+          {/* Form Card */}
+          <div className="rounded-3xl border border-[#E5E4E8] bg-white p-7 md:p-8 space-y-6 shadow-[0_16px_48px_rgba(60,49,91,0.08)]">
+            <div className="space-y-1 border-b border-[#E5E4E8] pb-4">
+              <h2 className="text-xl font-bold text-[#3C315B]">
+                {step === 1 && 'Credentials Setup'}
+                {step === 2 && 'Personal Information'}
+                {step === 3 && 'Behavioral Lifestyle Matching'}
+              </h2>
+              <p className="text-xs text-[#3C315B]/60 font-normal">
+                {step === 1 && 'Create a secure password with Argon2id protection.'}
+                {step === 2 && 'Enter your contact info for hostel resident records.'}
+                {step === 3 && 'Calibrate your profile for algorithmic roommate matching.'}
+              </p>
+            </div>
 
-          <CardContent className="space-y-4">
             {errorMsg && (
-              <div className="p-3.5 rounded-2xl bg-destructive/15 border border-destructive/30 flex items-center gap-2 text-xs text-destructive">
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2 text-xs text-red-700 font-medium">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{errorMsg}</span>
               </div>
@@ -183,57 +195,57 @@ export default function RegisterPage() {
                     className="space-y-4"
                   >
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                        <Mail className="h-3.5 w-3.5 text-purple-400" /> Email Address
+                      <label className="text-xs font-semibold text-[#3C315B] flex items-center gap-1.5">
+                        <Mail className="h-3.5 w-3.5 text-[#6A4FE0]" /> Email Address
                       </label>
-                      <Input
+                      <input
                         {...register('email')}
                         type="email"
                         placeholder="student@roomify.app"
-                        className="rounded-xl border-white/10 bg-black/40 h-11 text-sm focus:border-purple-500"
+                        className="w-full h-11 px-4 rounded-xl border border-[#E5E4E8] bg-white text-[#3C315B] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
                       />
                       {errors.email && (
-                        <p className="text-xs text-destructive">{errors.email.message}</p>
+                        <p className="text-xs text-red-500 font-medium">{errors.email.message}</p>
                       )}
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                        <Lock className="h-3.5 w-3.5 text-purple-400" /> Password
+                      <label className="text-xs font-semibold text-[#3C315B] flex items-center gap-1.5">
+                        <Lock className="h-3.5 w-3.5 text-[#6A4FE0]" /> Password
                       </label>
-                      <Input
+                      <input
                         {...register('password')}
                         type="password"
                         placeholder="••••••••"
-                        className="rounded-xl border-white/10 bg-black/40 h-11 text-sm focus:border-purple-500"
+                        className="w-full h-11 px-4 rounded-xl border border-[#E5E4E8] bg-white text-[#3C315B] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
                       />
                       {errors.password && (
-                        <p className="text-xs text-destructive">{errors.password.message}</p>
+                        <p className="text-xs text-red-500 font-medium">{errors.password.message}</p>
                       )}
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                        <Lock className="h-3.5 w-3.5 text-purple-400" /> Confirm Password
+                      <label className="text-xs font-semibold text-[#3C315B] flex items-center gap-1.5">
+                        <Lock className="h-3.5 w-3.5 text-[#6A4FE0]" /> Confirm Password
                       </label>
-                      <Input
+                      <input
                         {...register('confirmPassword')}
                         type="password"
                         placeholder="••••••••"
-                        className="rounded-xl border-white/10 bg-black/40 h-11 text-sm focus:border-purple-500"
+                        className="w-full h-11 px-4 rounded-xl border border-[#E5E4E8] bg-white text-[#3C315B] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
                       />
                       {errors.confirmPassword && (
-                        <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
+                        <p className="text-xs text-red-500 font-medium">{errors.confirmPassword.message}</p>
                       )}
                     </div>
 
-                    <Button
+                    <button
                       type="button"
                       onClick={handleNextStep}
-                      className="w-full h-11 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 hover:scale-[1.02] text-white font-semibold shadow-lg shadow-purple-500/25 transition-all"
+                      className="w-full h-11 rounded-xl bg-[#3C315B] hover:bg-[#2D2447] text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md"
                     >
-                      Next Step <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
+                      Next Step <ArrowRight className="h-4 w-4" />
+                    </button>
                   </motion.div>
                 )}
 
@@ -246,49 +258,48 @@ export default function RegisterPage() {
                     className="space-y-4"
                   >
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                        <User className="h-3.5 w-3.5 text-purple-400" /> Full Name
+                      <label className="text-xs font-semibold text-[#3C315B] flex items-center gap-1.5">
+                        <User className="h-3.5 w-3.5 text-[#6A4FE0]" /> Full Name
                       </label>
-                      <Input
+                      <input
                         {...register('fullName')}
                         placeholder="Alex Morgan"
-                        className="rounded-xl border-white/10 bg-black/40 h-11 text-sm focus:border-purple-500"
+                        className="w-full h-11 px-4 rounded-xl border border-[#E5E4E8] bg-white text-[#3C315B] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
                       />
                       {errors.fullName && (
-                        <p className="text-xs text-destructive">{errors.fullName.message}</p>
+                        <p className="text-xs text-red-500 font-medium">{errors.fullName.message}</p>
                       )}
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                        <Phone className="h-3.5 w-3.5 text-purple-400" /> Phone Number
+                      <label className="text-xs font-semibold text-[#3C315B] flex items-center gap-1.5">
+                        <Phone className="h-3.5 w-3.5 text-[#6A4FE0]" /> Phone Number
                       </label>
-                      <Input
+                      <input
                         {...register('phone')}
-                        placeholder="+61 400 000 000"
-                        className="rounded-xl border-white/10 bg-black/40 h-11 text-sm focus:border-purple-500"
+                        placeholder="+91 98765 43210"
+                        className="w-full h-11 px-4 rounded-xl border border-[#E5E4E8] bg-white text-[#3C315B] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
                       />
                       {errors.phone && (
-                        <p className="text-xs text-destructive">{errors.phone.message}</p>
+                        <p className="text-xs text-red-500 font-medium">{errors.phone.message}</p>
                       )}
                     </div>
 
                     <div className="flex items-center gap-3 pt-2">
-                      <Button
+                      <button
                         type="button"
-                        variant="outline"
                         onClick={() => setStep(1)}
-                        className="h-11 rounded-full border-white/15 hover:bg-white/5"
+                        className="h-11 px-5 rounded-xl border border-[#E5E4E8] text-[#3C315B] font-semibold text-xs hover:bg-[#FAFAFA] transition-colors flex items-center gap-1.5"
                       >
-                        <ArrowLeft className="mr-2 h-4 w-4" /> Back
-                      </Button>
-                      <Button
+                        <ArrowLeft className="h-4 w-4" /> Back
+                      </button>
+                      <button
                         type="button"
                         onClick={handleNextStep}
-                        className="flex-1 h-11 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 hover:scale-[1.02] text-white font-semibold shadow-lg shadow-purple-500/25 transition-all"
+                        className="flex-1 h-11 rounded-xl bg-[#3C315B] hover:bg-[#2D2447] text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 shadow-md"
                       >
-                        Continue to Preferences <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
+                        Continue to Preferences <ArrowRight className="h-4 w-4" />
+                      </button>
                     </div>
                   </motion.div>
                 )}
@@ -301,10 +312,9 @@ export default function RegisterPage() {
                     exit={{ opacity: 0, x: -20 }}
                     className="space-y-4"
                   >
-                    {/* Lifestyle Choices */}
                     <div className="space-y-3">
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-muted-foreground">Sleep Schedule</label>
+                        <label className="text-xs font-bold text-[#3C315B]">Sleep Schedule</label>
                         <div className="grid grid-cols-3 gap-2">
                           {[
                             { label: 'Early Bird', value: 'early_bird' },
@@ -315,10 +325,10 @@ export default function RegisterPage() {
                               key={opt.value}
                               type="button"
                               onClick={() => setValue('sleepSchedule', opt.value)}
-                              className={`p-2.5 rounded-xl text-xs font-medium border transition-all text-center ${
+                              className={`p-2.5 rounded-full text-xs font-semibold border transition-all text-center ${
                                 formValues.sleepSchedule === opt.value
-                                  ? 'bg-purple-600/30 border-purple-500 text-white shadow-sm'
-                                  : 'bg-black/40 border-white/10 text-muted-foreground hover:border-white/20'
+                                  ? 'bg-[#ECE8FE] text-[#3C315B] border-[#AB9FF2] shadow-sm'
+                                  : 'bg-white text-[#3C315B]/70 border-[#E5E4E8] hover:bg-[#FAFAFA]'
                               }`}
                             >
                               {opt.label}
@@ -328,7 +338,7 @@ export default function RegisterPage() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-muted-foreground">Cleanliness Standard</label>
+                        <label className="text-xs font-bold text-[#3C315B]">Cleanliness Standard</label>
                         <div className="grid grid-cols-3 gap-2">
                           {[
                             { label: 'Very Clean', value: 'very_clean' },
@@ -339,10 +349,10 @@ export default function RegisterPage() {
                               key={opt.value}
                               type="button"
                               onClick={() => setValue('cleanliness', opt.value)}
-                              className={`p-2.5 rounded-xl text-xs font-medium border transition-all text-center ${
+                              className={`p-2.5 rounded-full text-xs font-semibold border transition-all text-center ${
                                 formValues.cleanliness === opt.value
-                                  ? 'bg-purple-600/30 border-purple-500 text-white shadow-sm'
-                                  : 'bg-black/40 border-white/10 text-muted-foreground hover:border-white/20'
+                                  ? 'bg-[#ECE8FE] text-[#3C315B] border-[#AB9FF2] shadow-sm'
+                                  : 'bg-white text-[#3C315B]/70 border-[#E5E4E8] hover:bg-[#FAFAFA]'
                               }`}
                             >
                               {opt.label}
@@ -352,7 +362,7 @@ export default function RegisterPage() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-muted-foreground">Study Environment</label>
+                        <label className="text-xs font-bold text-[#3C315B]">Study Environment</label>
                         <div className="grid grid-cols-3 gap-2">
                           {[
                             { label: 'Silent', value: 'silent' },
@@ -363,10 +373,10 @@ export default function RegisterPage() {
                               key={opt.value}
                               type="button"
                               onClick={() => setValue('studyStyle', opt.value)}
-                              className={`p-2.5 rounded-xl text-xs font-medium border transition-all text-center ${
+                              className={`p-2.5 rounded-full text-xs font-semibold border transition-all text-center ${
                                 formValues.studyStyle === opt.value
-                                  ? 'bg-purple-600/30 border-purple-500 text-white shadow-sm'
-                                  : 'bg-black/40 border-white/10 text-muted-foreground hover:border-white/20'
+                                  ? 'bg-[#ECE8FE] text-[#3C315B] border-[#AB9FF2] shadow-sm'
+                                  : 'bg-white text-[#3C315B]/70 border-[#E5E4E8] hover:bg-[#FAFAFA]'
                               }`}
                             >
                               {opt.label}
@@ -377,37 +387,36 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="flex items-center gap-3 pt-2">
-                      <Button
+                      <button
                         type="button"
-                        variant="outline"
                         onClick={() => setStep(2)}
-                        className="h-11 rounded-full border-white/15 hover:bg-white/5"
+                        className="h-11 px-5 rounded-xl border border-[#E5E4E8] text-[#3C315B] font-semibold text-xs hover:bg-[#FAFAFA] transition-colors flex items-center gap-1.5"
                       >
-                        <ArrowLeft className="mr-2 h-4 w-4" /> Back
-                      </Button>
-                      <Button
+                        <ArrowLeft className="h-4 w-4" /> Back
+                      </button>
+                      <button
                         type="submit"
                         disabled={isLoading}
-                        className="flex-1 h-11 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 hover:scale-[1.02] text-white font-semibold shadow-lg shadow-purple-500/25 transition-all"
+                        className="flex-1 h-11 rounded-xl bg-[#3C315B] hover:bg-[#2D2447] text-white font-bold text-xs transition-all shadow-md"
                       >
                         {isLoading ? 'Creating Account...' : 'Complete Registration'}
-                      </Button>
+                      </button>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </form>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Footer Link */}
-        <p className="text-center text-xs text-muted-foreground">
-          Already have an account?{' '}
-          <Link href="/login" className="text-purple-400 hover:underline font-semibold">
-            Sign In to Portal
-          </Link>
-        </p>
+          {/* Footer Link */}
+          <p className="text-center text-xs text-[#3C315B]/60 font-normal">
+            Already have an account?{' '}
+            <Link href="/login" className="text-[#6A4FE0] hover:text-[#3C315B] font-bold transition-colors">
+              Sign In to Portal
+            </Link>
+          </p>
+        </motion.div>
       </div>
-    </main>
+    </div>
   );
 }

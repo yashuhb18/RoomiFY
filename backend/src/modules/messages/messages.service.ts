@@ -111,17 +111,19 @@ export class MessagesService {
       userId: senderId,
     });
 
-    // Send email alert to Warden or SuperAdmin when concern is raised
+    // Send email alert asynchronously in background without blocking API response
     if (message.receiver.role === Role.SUPER_ADMIN || message.receiver.role === Role.WARDEN) {
       const senderProfile = (message.sender.profile as any) || {};
       const senderName = senderProfile.fullName || message.sender.email.split('@')[0];
-      this.mailService.sendWardenConcernAlert(
-        message.receiver.email,
-        senderName,
-        message.sender.email,
-        message.sender.role,
-        dto.content,
-      ).catch(() => {});
+      setImmediate(() => {
+        this.mailService.sendWardenConcernAlert(
+          message.receiver.email,
+          senderName,
+          message.sender.email,
+          message.sender.role,
+          dto.content,
+        ).catch(() => {});
+      });
     }
 
     return message;

@@ -2,38 +2,42 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ShieldAlert, ArrowLeft, Home } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Home, ArrowLeft } from 'lucide-react';
+import { Logo } from '@/components/common/logo';
 
 export default function NotFoundPage() {
   return (
-    <main className="relative min-h-screen bg-[#0A0A0A] text-white flex flex-col items-center justify-center p-6 text-center overflow-hidden">
-      {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] rounded-full bg-purple-600/20 blur-[140px]" />
+    <div className="min-h-screen bg-[#EDEAFD] flex flex-col items-center justify-center p-6 text-center">
+      {/* Container Card */}
+      <div className="w-full max-w-md bg-white rounded-3xl border border-[#E5E4E8] p-8 md:p-10 shadow-[0_16px_48px_rgba(60,49,91,0.08)] space-y-6 flex flex-col items-center">
+        {/* RoomiFy Logo */}
+        <Logo size="lg" href="/" />
 
-      <div className="relative z-10 space-y-6 max-w-md">
-        <div className="h-16 w-16 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 flex items-center justify-center mx-auto shadow-xl shadow-purple-500/25">
-          <ShieldAlert className="h-8 w-8 text-white" />
-        </div>
-
-        <div className="space-y-2">
-          <h1 className="text-7xl font-black tracking-tight bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
-            404
+        {/* 404 Banner */}
+        <div className="space-y-2 pt-2">
+          <span className="px-3.5 py-1 rounded-full bg-[#ECE8FE] text-[#6A4FE0] text-xs font-extrabold tracking-wider uppercase">
+            Error 404
+          </span>
+          <h1 className="text-5xl font-extrabold text-[#3C315B] tracking-tight">
+            Page Not Found
           </h1>
-          <h2 className="text-xl font-bold text-white">Page Not Found</h2>
-          <p className="text-xs text-muted-foreground leading-relaxed">
+          <p className="text-xs text-[#3C315B]/70 leading-relaxed font-normal max-w-xs mx-auto">
             The requested route does not exist or you do not have permission to access it.
           </p>
         </div>
 
-        <div className="pt-2">
+        {/* Return Button */}
+        <div className="w-full pt-2">
           <Link href="/">
-            <Button className="rounded-full bg-gradient-to-r from-purple-600 to-pink-500 hover:scale-105 text-white font-semibold text-xs px-8 h-11 shadow-lg shadow-purple-500/25 transition-all">
-              <Home className="mr-2 h-4 w-4" /> Return to Safety
-            </Button>
+            <button
+              type="button"
+              className="w-full h-11 rounded-xl bg-[#3C315B] hover:bg-[#2D2447] text-white font-semibold text-xs transition-all shadow-md flex items-center justify-center gap-2"
+            >
+              <Home className="h-4 w-4" /> Return to Safety Console
+            </button>
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

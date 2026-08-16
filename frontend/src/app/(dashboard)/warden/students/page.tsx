@@ -46,74 +46,74 @@ export default function WardenStudentsPage() {
   );
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="border-purple-500/40 text-purple-300 font-mono text-[10px] uppercase">
+    <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
+      {/* Hero Banner Card */}
+      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-3 shadow-sm border border-[#E5E4E8]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <span className="px-3.5 py-1 rounded-full bg-[#3C315B] text-white text-[11px] font-semibold tracking-wide">
               Resident Roster
-            </Badge>
+            </span>
+            <h1 className="text-3xl font-bold text-[#3C315B] tracking-tight flex items-center gap-2 pt-1">
+              <Users className="h-7 w-7 text-[#6A4FE0]" /> Student Management
+            </h1>
+            <p className="text-xs text-[#3C315B]/70 max-w-xl font-normal">
+              Search student profiles, view roommate preferences, and monitor occupancy status.
+            </p>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
-            Student Management
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Search student profiles, view roommate preferences, and monitor occupancy status.
-          </p>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
+          <button
+            type="button"
             onClick={() => refetch()}
-            className="border-white/15 hover:bg-white/5"
+            className="px-4 py-2 rounded-full bg-white text-[#3C315B] font-semibold text-xs border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-2 shadow-sm w-fit"
           >
-            <RefreshCw className="mr-2 h-4 w-4 text-purple-400" /> Refresh Roster
-          </Button>
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh Roster
+          </button>
         </div>
       </div>
 
-      {/* Search Input */}
+      {/* Search Bar */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-[#3C315B]/50" />
         <Input
           placeholder="Search by student name or email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 rounded-full border-white/10 bg-black/40 h-11 text-xs"
+          className="pl-10 rounded-full border-[#E5E4E8] bg-white h-11 text-xs text-[#3C315B] shadow-sm"
         />
       </div>
 
-      <Card className="rounded-3xl border border-white/10 bg-[#1A1A1A]/80 backdrop-blur-xl p-6">
+      {/* Table Card */}
+      <div className="rounded-3xl border border-[#E5E4E8] bg-white p-6 shadow-sm">
         {isLoading ? (
-          <p className="text-xs text-muted-foreground text-center py-8">Loading student directory...</p>
+          <p className="text-xs text-[#3C315B]/60 text-center py-8">Loading student directory...</p>
         ) : filteredStudents.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="font-mono text-xs">Student</TableHead>
-                <TableHead className="font-mono text-xs">Email</TableHead>
-                <TableHead className="font-mono text-xs">Sleep Schedule</TableHead>
-                <TableHead className="font-mono text-xs">Cleanliness</TableHead>
-                <TableHead className="font-mono text-xs text-right">Actions</TableHead>
+                <TableHead className="text-xs font-semibold text-[#3C315B]">STUDENT</TableHead>
+                <TableHead className="text-xs font-semibold text-[#3C315B]">EMAIL</TableHead>
+                <TableHead className="text-xs font-semibold text-[#3C315B]">SLEEP SCHEDULE</TableHead>
+                <TableHead className="text-xs font-semibold text-[#3C315B]">CLEANLINESS</TableHead>
+                <TableHead className="text-xs font-semibold text-[#3C315B] text-right">ACTIONS</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredStudents.map((s: any) => (
-                <TableRow key={s.id}>
-                  <TableCell className="font-bold text-white flex items-center gap-3">
-                    <Avatar className="h-8 w-8 border border-purple-500/30">
-                      <AvatarFallback className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold text-xs">
+                <TableRow key={s.id} className="hover:bg-[#FAFAFA]">
+                  <TableCell className="font-bold text-[#3C315B] flex items-center gap-3">
+                    <Avatar className="h-8 w-8 border border-[#E5E4E8]">
+                      <AvatarFallback className="bg-[#ECE8FE] text-[#3C315B] font-bold text-xs">
                         {s.email.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <span>{s.profile?.fullName || 'Resident Student'}</span>
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">{s.email}</TableCell>
-                  <TableCell className="font-mono text-xs text-purple-300 capitalize">
+                  <TableCell className="text-xs text-[#3C315B]/70 font-medium">{s.email}</TableCell>
+                  <TableCell className="text-xs text-[#3C315B] font-semibold capitalize">
                     {s.profile?.sleepSchedule?.replace('_', ' ') || 'Flexible'}
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-cyan-300 capitalize">
+                  <TableCell className="text-xs text-emerald-700 font-semibold capitalize">
                     {s.profile?.cleanliness?.replace('_', ' ') || 'Moderate'}
                   </TableCell>
                   <TableCell className="text-right">
@@ -121,7 +121,7 @@ export default function WardenStudentsPage() {
                       size="sm"
                       variant="ghost"
                       onClick={() => setSelectedStudent(s)}
-                      className="text-xs text-purple-400 hover:text-purple-300"
+                      className="text-xs text-[#6A4FE0] font-bold hover:bg-[#ECE8FE]"
                     >
                       <Eye className="mr-1.5 h-3.5 w-3.5" /> View Profile
                     </Button>
@@ -131,49 +131,49 @@ export default function WardenStudentsPage() {
             </TableBody>
           </Table>
         ) : (
-          <p className="text-xs text-muted-foreground text-center py-8">No students found matching query.</p>
+          <p className="text-xs text-[#3C315B]/60 text-center py-8">No students found matching query.</p>
         )}
-      </Card>
+      </div>
 
-      {/* Student Profile Viewer Modal */}
+      {/* Student Profile Modal */}
       <Dialog open={!!selectedStudent} onOpenChange={() => setSelectedStudent(null)}>
-        <DialogContent className="rounded-3xl border border-white/10 bg-[#1A1A1A] text-white">
+        <DialogContent className="rounded-3xl border border-[#E5E4E8] bg-white text-[#3C315B]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold flex items-center gap-2">
-              <UserCheck className="h-5 w-5 text-purple-400" /> Resident Profile
+            <DialogTitle className="text-lg font-bold flex items-center gap-2 text-[#3C315B]">
+              <UserCheck className="h-5 w-5 text-[#6A4FE0]" /> Resident Profile
             </DialogTitle>
-            <DialogDescription className="text-xs">
+            <DialogDescription className="text-xs text-[#3C315B]/60">
               Read-only details for resident profile and roommate traits.
             </DialogDescription>
           </DialogHeader>
 
           {selectedStudent && (
             <div className="space-y-4 pt-2 text-xs">
-              <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2">
+              <div className="p-4 rounded-2xl bg-[#FAFAFA] border border-[#E5E4E8] space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground font-mono">Email</span>
-                  <span className="font-bold text-white">{selectedStudent.email}</span>
+                  <span className="text-[#3C315B]/60 font-medium">Email</span>
+                  <span className="font-bold text-[#3C315B]">{selectedStudent.email}</span>
                 </div>
-                <div className="flex items-center justify-between border-t border-white/5 pt-2">
-                  <span className="text-muted-foreground font-mono">Role</span>
-                  <Badge variant="secondary">{selectedStudent.role}</Badge>
+                <div className="flex items-center justify-between border-t border-[#E5E4E8] pt-2">
+                  <span className="text-[#3C315B]/60 font-medium">Role</span>
+                  <Badge variant="secondary" className="bg-[#ECE8FE] text-[#3C315B] font-bold">{selectedStudent.role}</Badge>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <h4 className="font-bold text-purple-300 font-mono">Lifestyle Attributes</h4>
-                <div className="grid grid-cols-2 gap-2 text-muted-foreground">
-                  <div className="p-2.5 rounded-xl bg-card/60 border border-white/5">
-                    Sleep: <span className="text-white font-semibold">{selectedStudent.profile?.sleepSchedule}</span>
+                <h4 className="font-bold text-[#3C315B]">Lifestyle Attributes</h4>
+                <div className="grid grid-cols-2 gap-2 text-[#3C315B]">
+                  <div className="p-2.5 rounded-xl bg-[#FAFAFA] border border-[#E5E4E8]">
+                    Sleep: <span className="font-semibold">{selectedStudent.profile?.sleepSchedule || 'Flexible'}</span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-card/60 border border-white/5">
-                    Cleanliness: <span className="text-white font-semibold">{selectedStudent.profile?.cleanliness}</span>
+                  <div className="p-2.5 rounded-xl bg-[#FAFAFA] border border-[#E5E4E8]">
+                    Cleanliness: <span className="font-semibold">{selectedStudent.profile?.cleanliness || 'Moderate'}</span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-card/60 border border-white/5">
-                    Study: <span className="text-white font-semibold">{selectedStudent.profile?.studyStyle}</span>
+                  <div className="p-2.5 rounded-xl bg-[#FAFAFA] border border-[#E5E4E8]">
+                    Study: <span className="font-semibold">{selectedStudent.profile?.studyStyle || 'Quiet'}</span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-card/60 border border-white/5">
-                    Smoking: <span className="text-white font-semibold">{selectedStudent.profile?.smoking}</span>
+                  <div className="p-2.5 rounded-xl bg-[#FAFAFA] border border-[#E5E4E8]">
+                    Smoking: <span className="font-semibold">{selectedStudent.profile?.smoking || 'Non-Smoker'}</span>
                   </div>
                 </div>
               </div>

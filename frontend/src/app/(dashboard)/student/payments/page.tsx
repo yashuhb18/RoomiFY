@@ -83,104 +83,107 @@ export default function StudentPaymentsPage() {
   });
 
   return (
-    <div className="space-y-8 pb-12">
-      <PageHero
-        mode="bone"
-        icon={CreditCard}
-        badges={['Secure Payments', 'Powered by Razorpay']}
-        title="Fee Payments & Dues"
-        description="View your pending hostel invoices and pay them securely via UPI, Cards, or Netbanking."
-      />
+    <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
+      {/* Hero Banner Card */}
+      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-3 shadow-sm border border-[#E5E4E8]">
+        <div className="flex items-center gap-2">
+          <span className="px-3.5 py-1 rounded-full bg-[#3C315B] text-white text-[11px] font-semibold tracking-wide shadow-sm">
+            Secure Razorpay Integration
+          </span>
+        </div>
+        <h1 className="text-3xl font-bold text-[#3C315B] tracking-tight pt-1 flex items-center gap-2">
+          <CreditCard className="h-7 w-7 text-[#6A4FE0]" /> Fee Payments & Dues
+        </h1>
+        <p className="text-xs text-[#3C315B]/70 max-w-2xl leading-relaxed font-normal">
+          View your pending hostel invoices and pay them securely via UPI, Cards, or Netbanking.
+        </p>
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="border-ash">
-            <CardHeader className="border-b border-ash bg-bone/30 pb-4">
-              <CardTitle className="text-subheading font-light text-aubergine flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-amber-500" /> Pending Dues
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {isLoading ? (
-                <div className="p-8 text-center text-fog animate-pulse text-caption">Loading invoices...</div>
-              ) : invoices?.filter((i: any) => i.status !== 'PAID').length > 0 ? (
-                <div className="divide-y divide-ash">
-                  {invoices.filter((i: any) => i.status !== 'PAID').map((invoice: any) => (
-                    <div key={invoice.id} className="p-6 flex items-center justify-between hover:bg-bone/30 transition-colors">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-aubergine">{invoice.title}</h4>
-                          {invoice.status === 'OVERDUE' && (
-                            <Badge variant="destructive" className="text-[10px]">Overdue</Badge>
-                          )}
-                        </div>
-                        <p className="text-caption text-fog">{invoice.description}</p>
-                        {invoice.dueDate && (
-                          <p className="text-[11px] text-amber-600 flex items-center gap-1 mt-1">
-                            <Clock className="h-3 w-3" /> Due by {new Date(invoice.dueDate).toLocaleDateString()}
-                          </p>
+        <div className="lg:col-span-2 space-y-4">
+          <div className="rounded-3xl bg-white border border-[#E5E4E8] p-6 shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-[#3C315B] flex items-center gap-2 border-b border-[#E5E4E8] pb-3">
+              <AlertCircle className="h-5 w-5 text-amber-500" /> Pending Dues
+            </h3>
+
+            {isLoading ? (
+              <div className="p-8 text-center text-[#3C315B]/60 animate-pulse text-xs">Loading invoices...</div>
+            ) : invoices?.filter((i: any) => i.status !== 'PAID').length > 0 ? (
+              <div className="divide-y divide-[#E5E4E8]">
+                {invoices.filter((i: any) => i.status !== 'PAID').map((invoice: any) => (
+                  <div key={invoice.id} className="py-4 flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-[#3C315B] text-sm">{invoice.title}</h4>
+                        {invoice.status === 'OVERDUE' && (
+                          <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold">
+                            Overdue
+                          </span>
                         )}
                       </div>
-                      <div className="text-right space-y-3">
-                        <div className="text-xl font-light text-aubergine flex items-center justify-end">
-                          <IndianRupee className="h-5 w-5 mr-0.5" /> {invoice.amount.toLocaleString('en-IN')}
-                        </div>
-                        <Button
-                          onClick={() => payMutation.mutate(invoice.id)}
-                          disabled={!isRazorpayLoaded || payMutation.isPending}
-                          size="sm"
-                          className="bg-cornflower-pop hover:bg-cornflower-pop/90 text-white w-full"
-                        >
-                          {payMutation.isPending ? 'Processing...' : 'Pay Now'}
-                        </Button>
-                      </div>
+                      <p className="text-xs text-[#3C315B]/60 font-normal">{invoice.description}</p>
+                      {invoice.dueDate && (
+                        <p className="text-[11px] text-amber-600 flex items-center gap-1 font-medium pt-0.5">
+                          <Clock className="h-3.5 w-3.5" /> Due by {new Date(invoice.dueDate).toLocaleDateString()}
+                        </p>
+                      )}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-12 text-center text-fog space-y-3">
-                  <CheckCircle2 className="h-12 w-12 mx-auto text-mint-signal/50" />
-                  <p className="text-caption">All caught up! No pending dues.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    <div className="text-right space-y-2 shrink-0">
+                      <div className="text-xl font-extrabold text-[#3C315B] flex items-center justify-end">
+                        ₹ {invoice.amount.toLocaleString('en-IN')}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => payMutation.mutate(invoice.id)}
+                        disabled={!isRazorpayLoaded || payMutation.isPending}
+                        className="px-5 py-2 rounded-xl bg-[#6A4FE0] hover:bg-[#5B3FD1] text-white text-xs font-bold transition-all shadow-md"
+                      >
+                        {payMutation.isPending ? 'Processing...' : 'Pay Now'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-12 text-center text-[#3C315B]/60 space-y-3">
+                <CheckCircle2 className="h-12 w-12 mx-auto text-[#2EC08B]" />
+                <p className="text-xs font-medium">All caught up! No pending dues.</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="space-y-6">
-          <Card className="border-ash">
-            <CardHeader className="border-b border-ash bg-bone/30 pb-4">
-              <CardTitle className="text-subheading font-light text-aubergine flex items-center gap-2">
-                <History className="h-5 w-5 text-cornflower-pop" /> Payment History
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {invoices?.filter((i: any) => i.status === 'PAID').length > 0 ? (
-                <div className="divide-y divide-ash">
-                  {invoices.filter((i: any) => i.status === 'PAID').map((invoice: any) => (
-                    <div key={invoice.id} className="p-4 flex items-center justify-between">
-                      <div>
-                        <p className="text-caption font-medium text-aubergine">{invoice.title}</p>
-                        <p className="text-[10px] text-fog">{new Date(invoice.updatedAt).toLocaleDateString()}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-caption text-mint-signal font-medium">
-                          ₹{invoice.amount.toLocaleString('en-IN')}
-                        </p>
-                        <Badge variant="outline" className="text-[9px] mt-1 bg-mint-signal/10 text-mint-signal border-mint-signal/20">
-                          Paid
-                        </Badge>
-                      </div>
+        <div className="space-y-4">
+          <div className="rounded-3xl bg-white border border-[#E5E4E8] p-6 shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-[#3C315B] flex items-center gap-2 border-b border-[#E5E4E8] pb-3">
+              <History className="h-5 w-5 text-[#6A4FE0]" /> Payment History
+            </h3>
+
+            {invoices?.filter((i: any) => i.status === 'PAID').length > 0 ? (
+              <div className="divide-y divide-[#E5E4E8]">
+                {invoices.filter((i: any) => i.status === 'PAID').map((invoice: any) => (
+                  <div key={invoice.id} className="py-3 flex items-center justify-between text-xs">
+                    <div>
+                      <p className="font-bold text-[#3C315B]">{invoice.title}</p>
+                      <p className="text-[10px] text-[#3C315B]/50">{new Date(invoice.updatedAt).toLocaleDateString()}</p>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center text-[11px] text-fog">
-                  No past payments found.
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    <div className="text-right">
+                      <p className="font-bold text-[#2EC08B]">
+                        ₹{invoice.amount.toLocaleString('en-IN')}
+                      </p>
+                      <span className="px-2 py-0.5 rounded-full bg-[#E6F9F0] text-[#2EC08B] text-[9px] font-bold inline-block mt-0.5">
+                        Paid
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-xs text-[#3C315B]/50 font-normal">
+                No past payments found.
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

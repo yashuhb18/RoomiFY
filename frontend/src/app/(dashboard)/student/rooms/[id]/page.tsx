@@ -102,61 +102,73 @@ export default function StudentRoomDetailPage() {
   const pendingRequest = myRequests?.find((r: any) => r.status === 'PENDING');
 
   return (
-    <div className="space-y-8 pb-12">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => router.push('/student/rooms')}
-        className="text-caption text-fog hover:text-aubergine"
-      >
-        <ArrowLeft className="mr-1.5 h-4 w-4" /> Back to Explore Rooms
-      </Button>
+    <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
+      {/* Back Button */}
+      <div>
+        <button
+          type="button"
+          onClick={() => router.push('/student/rooms')}
+          className="px-4 py-2 rounded-full bg-white text-[#3C315B] text-xs font-bold border border-[#E5E4E8] shadow-sm hover:bg-[#FAFAFA] transition-all flex items-center gap-1.5"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Explore Rooms
+        </button>
+      </div>
 
-      <PageHero
-        mode="bone"
-        icon={Building2}
-        badges={[`Floor ${room.floor}`, `${availableBeds} / ${room.capacity} Beds Available`]}
-        title={`Room ${room.roomNumber} Detail`}
-        description={room.description || `Inspect facilities, bed arrangement, and submit a room allocation request to the warden.`}
-      />
+      {/* Hero Banner Card */}
+      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-3 shadow-sm border border-[#E5E4E8]">
+        <div className="flex items-center gap-2">
+          <span className="px-3.5 py-1 rounded-full bg-[#3C315B] text-white text-[11px] font-semibold tracking-wide">
+            Floor {room.floor}
+          </span>
+          <span className="px-3.5 py-1 rounded-full bg-[#E6F9F0] text-[#2EC08B] text-[11px] font-bold tracking-wide">
+            {availableBeds} / {room.capacity} Beds Available
+          </span>
+        </div>
+        <h1 className="text-3xl font-bold text-[#3C315B] tracking-tight flex items-center gap-2 pt-1">
+          <Building2 className="h-7 w-7 text-[#6A4FE0]" /> Room {room.roomNumber} Detail
+        </h1>
+        <p className="text-xs text-[#3C315B]/70 max-w-2xl leading-relaxed font-normal">
+          {room.description || `Inspect room specifications, bed arrangement, and submit a room allocation request to your warden.`}
+        </p>
+      </div>
 
       {/* Warning Banners */}
       {hasActiveAllocation && (
-        <Card className="p-4 bg-blush-mist/30 border border-blush-mist text-caption text-aubergine flex items-center gap-3">
+        <div className="p-5 bg-amber-50 border border-amber-200 rounded-3xl text-amber-900 flex items-center gap-3 shadow-sm text-xs">
           <ShieldAlert className="h-5 w-5 shrink-0 text-amber-600" />
           <div>
-            <span className="font-semibold block">Active Allocation Detected</span>
-            <span>
+            <span className="font-bold block">Active Allocation Detected</span>
+            <span className="text-amber-800/80 font-normal">
               You are currently allocated to Room {activeAllocation.room?.roomNumber}. Request a room transfer if you wish to move.
             </span>
           </div>
-        </Card>
+        </div>
       )}
 
       {pendingRequest && (
-        <Card className="p-4 bg-cornflower-pop/10 border border-cornflower-pop/20 text-caption text-aubergine flex items-center gap-3">
-          <Clock className="h-5 w-5 shrink-0 text-cornflower-pop" />
+        <div className="p-5 bg-[#ECE8FE] border border-[#AB9FF2]/40 rounded-3xl text-[#3C315B] flex items-center gap-3 shadow-sm text-xs">
+          <Clock className="h-5 w-5 shrink-0 text-[#6A4FE0]" />
           <div>
-            <span className="font-semibold block">Request Pending</span>
-            <span>
-              You have a pending request for Room {pendingRequest.room?.roomNumber}. Awaiting Warden review.
+            <span className="font-bold block">Request Pending Review</span>
+            <span className="text-[#3C315B]/70 font-normal">
+              You have a pending request for Room {pendingRequest.room?.roomNumber}. Awaiting Warden approval.
             </span>
           </div>
-        </Card>
+        </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Left 2 Cols: Photos & Details */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Left 2 Cols: Photos & Beds */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Photo Gallery */}
-          <Card className="overflow-hidden border-ash p-6 space-y-4">
-            <h3 className="text-subheading font-light text-aubergine flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-cornflower-pop" /> Approved Room Photographs
+          {/* Photo Gallery Card */}
+          <div className="rounded-3xl border border-[#E5E4E8] bg-white p-6 space-y-4 shadow-sm">
+            <h3 className="text-base font-bold text-[#3C315B] flex items-center gap-2 border-b border-[#E5E4E8] pb-3">
+              <Sparkles className="h-5 w-5 text-[#6A4FE0]" /> Approved Room Photographs
             </h3>
 
             {room.images && room.images.length > 0 ? (
               <div className="space-y-4">
-                <div className="h-72 w-full rounded-card overflow-hidden bg-bone border border-ash">
+                <div className="h-72 w-full rounded-2xl overflow-hidden bg-[#FAFAFA] border border-[#E5E4E8]">
                   <img
                     src={room.images[0].secureUrl}
                     alt={`Room ${room.roomNumber}`}
@@ -166,7 +178,7 @@ export default function StudentRoomDetailPage() {
                 {room.images.length > 1 && (
                   <div className="grid grid-cols-4 gap-3">
                     {room.images.slice(1).map((img: any) => (
-                      <div key={img.id} className="h-20 rounded-card overflow-hidden border border-ash bg-bone">
+                      <div key={img.id} className="h-20 rounded-xl overflow-hidden border border-[#E5E4E8] bg-[#FAFAFA]">
                         <img src={img.secureUrl} alt="Room detail" className="w-full h-full object-cover" />
                       </div>
                     ))}
@@ -174,17 +186,17 @@ export default function StudentRoomDetailPage() {
                 )}
               </div>
             ) : (
-              <div className="h-48 rounded-card bg-bone border border-dashed border-ash flex flex-col items-center justify-center p-6 text-center text-fog space-y-2">
-                <Building2 className="h-10 w-10 text-cornflower-pop/30" />
-                <p className="text-caption">Official photographs pending warden upload.</p>
+              <div className="h-48 rounded-2xl bg-[#FAFAFA] border border-dashed border-[#E5E4E8] flex flex-col items-center justify-center p-6 text-center text-[#3C315B]/60 space-y-2">
+                <Building2 className="h-10 w-10 text-[#6A4FE0]/30" />
+                <p className="text-xs font-medium">Official photographs pending warden upload.</p>
               </div>
             )}
-          </Card>
+          </div>
 
-          {/* Bed Allocation Grid */}
-          <Card className="p-6 border-ash space-y-4">
-            <h3 className="text-subheading font-light text-aubergine flex items-center gap-2">
-              <BedDouble className="h-5 w-5 text-cornflower-pop" /> Bed Arrangement & Occupancy
+          {/* Bed Arrangement Card */}
+          <div className="rounded-3xl border border-[#E5E4E8] bg-white p-6 space-y-4 shadow-sm">
+            <h3 className="text-base font-bold text-[#3C315B] flex items-center gap-2 border-b border-[#E5E4E8] pb-3">
+              <BedDouble className="h-5 w-5 text-[#6A4FE0]" /> Bed Arrangement &amp; Occupancy
             </h3>
 
             <div className="grid sm:grid-cols-2 gap-4">
@@ -200,30 +212,31 @@ export default function StudentRoomDetailPage() {
                         setSelectedBedId(bed.id);
                       }
                     }}
-                    className={`p-4 rounded-card border transition-all cursor-pointer ${
-                      isSelected
-                        ? 'border-cornflower-pop bg-cornflower-pop/10 shadow-sm'
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer ${isSelected
+                        ? 'border-[#6A4FE0] bg-[#ECE8FE] shadow-sm'
                         : bed.isAvailable
-                        ? 'border-ash bg-bone hover:border-cornflower-pop/40'
-                        : 'border-ash bg-bone/40 opacity-70 cursor-not-allowed'
-                    }`}
+                          ? 'border-[#E5E4E8] bg-white hover:border-[#AB9FF2]'
+                          : 'border-[#E5E4E8] bg-[#FAFAFA] opacity-70 cursor-not-allowed'
+                      }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-light text-aubergine text-body-sm">
+                      <span className="font-bold text-[#3C315B] text-xs">
                         {bed.label || `Bed ${bed.bedNumber}`}
                       </span>
-                      <Badge variant={bed.isAvailable ? 'success' : 'outline'}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        bed.isAvailable ? 'bg-[#E6F9F0] text-[#2EC08B]' : 'bg-zinc-100 text-zinc-600'
+                      }`}>
                         {bed.isAvailable ? 'Available' : 'Occupied'}
-                      </Badge>
+                      </span>
                     </div>
 
                     {occupant ? (
-                      <div className="mt-3 pt-2 border-t border-ash text-[11px] text-fog flex items-center gap-2">
-                        <Users className="h-3.5 w-3.5 text-cornflower-pop shrink-0" />
-                        <span className="truncate">{occupant.profile?.fullName || occupant.email}</span>
+                      <div className="mt-3 pt-2 border-t border-[#E5E4E8] text-[11px] text-[#3C315B]/70 flex items-center gap-2">
+                        <Users className="h-3.5 w-3.5 text-[#6A4FE0] shrink-0" />
+                        <span className="truncate font-semibold">{occupant.profile?.fullName || occupant.email}</span>
                       </div>
                     ) : (
-                      <p className="mt-2 text-[11px] text-fog font-light">
+                      <p className="mt-2 text-[11px] text-[#3C315B]/60 font-normal">
                         {isSelected ? 'Selected for request' : 'Click to select this bed'}
                       </p>
                     )}
@@ -231,49 +244,49 @@ export default function StudentRoomDetailPage() {
                 );
               })}
             </div>
-          </Card>
+          </div>
         </div>
 
-        {/* Right Col: Specifications & Request Panel */}
+        {/* Right Col: Room Specifications */}
         <div className="space-y-6">
-          <Card className="p-6 border-ash space-y-6">
-            <div className="space-y-4 border-b border-ash pb-4">
-              <h3 className="text-subheading font-light text-aubergine">Room Specifications</h3>
+          <div className="rounded-3xl border border-[#E5E4E8] bg-white p-6 space-y-6 shadow-sm">
+            <div className="space-y-3 border-b border-[#E5E4E8] pb-4">
+              <h3 className="text-base font-bold text-[#3C315B]">Room Specifications</h3>
 
-              <div className="space-y-2 text-caption">
-                <div className="flex justify-between py-1 border-b border-ash/50">
-                  <span className="text-fog">Room Number</span>
-                  <span className="font-semibold text-aubergine">{room.roomNumber}</span>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between py-1.5 border-b border-[#E5E4E8]">
+                  <span className="text-[#3C315B]/60 font-medium">Room Number</span>
+                  <span className="font-bold text-[#3C315B]">{room.roomNumber}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-ash/50">
-                  <span className="text-fog">Floor</span>
-                  <span className="text-aubergine">Floor {room.floor}</span>
+                <div className="flex justify-between py-1.5 border-b border-[#E5E4E8]">
+                  <span className="text-[#3C315B]/60 font-medium">Floor</span>
+                  <span className="font-semibold text-[#3C315B]">Floor {room.floor}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-ash/50">
-                  <span className="text-fog">Capacity</span>
-                  <span className="text-aubergine">{room.capacity} Beds</span>
+                <div className="flex justify-between py-1.5 border-b border-[#E5E4E8]">
+                  <span className="text-[#3C315B]/60 font-medium">Capacity</span>
+                  <span className="font-semibold text-[#3C315B]">{room.capacity} Beds</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-ash/50">
-                  <span className="text-fog">Current Occupancy</span>
-                  <span className="text-aubergine">{room.currentOccupancy} Allocated</span>
+                <div className="flex justify-between py-1.5 border-b border-[#E5E4E8]">
+                  <span className="text-[#3C315B]/60 font-medium">Current Occupancy</span>
+                  <span className="font-bold text-[#3C315B]">{room.currentOccupancy} Allocated</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-ash/50">
-                  <span className="text-fog">Condition</span>
-                  <Badge variant="outline" className="capitalize text-[10px]">
+                <div className="flex justify-between py-1.5 border-b border-[#E5E4E8]">
+                  <span className="text-[#3C315B]/60 font-medium">Condition</span>
+                  <Badge variant="outline" className="capitalize text-[10px] bg-[#FAFAFA] border-[#E5E4E8] text-[#3C315B] font-bold">
                     {room.condition?.toLowerCase() || 'Good'}
                   </Badge>
                 </div>
               </div>
             </div>
 
-            {/* Facilities */}
+            {/* Room Facilities */}
             <div className="space-y-2">
-              <span className="text-caption font-light text-aubergine block">Room Facilities</span>
+              <span className="text-xs font-bold text-[#3C315B] block">Room Facilities</span>
               <div className="flex flex-wrap gap-2">
                 {['Bed', 'Study Table', 'Cupboard', 'Fan', 'Wi-Fi'].map((fac) => (
-                  <Badge key={fac} variant="secondary" className="text-caption">
-                    <CheckCircle2 className="mr-1 h-3 w-3 text-mint-signal" /> {fac}
-                  </Badge>
+                  <span key={fac} className="px-3 py-1 rounded-full bg-[#ECE8FE] text-[#3C315B] text-xs font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3 text-[#6A4FE0]" /> {fac}
+                  </span>
                 ))}
               </div>
             </div>
@@ -281,37 +294,37 @@ export default function StudentRoomDetailPage() {
             {/* Action Button */}
             <div className="pt-2">
               {isUnderMaintenance ? (
-                <Button disabled className="w-full text-caption bg-amber-500">
+                <Button disabled className="w-full text-xs font-bold bg-amber-500 text-white rounded-2xl h-11">
                   <AlertTriangle className="mr-2 h-4 w-4" /> Under Maintenance
                 </Button>
               ) : isFull ? (
-                <Button disabled className="w-full text-caption">
+                <Button disabled className="w-full text-xs font-bold bg-zinc-200 text-zinc-500 rounded-2xl h-11">
                   Currently Full
                 </Button>
               ) : pendingRequest ? (
-                <Button disabled className="w-full text-caption variant-outline">
-                  <Clock className="mr-2 h-4 w-4 text-cornflower-pop" /> Request Pending Review
+                <Button disabled className="w-full text-xs font-bold bg-[#ECE8FE] text-[#3C315B] rounded-2xl h-11 border border-[#AB9FF2]/40">
+                  <Clock className="mr-2 h-4 w-4 text-[#6A4FE0]" /> Request Pending Review
                 </Button>
               ) : hasActiveAllocation ? (
-                <Button disabled className="w-full text-caption">
+                <Button disabled className="w-full text-xs font-bold bg-zinc-200 text-zinc-500 rounded-2xl h-11">
                   Already Allocated
                 </Button>
               ) : (
                 <Button
                   onClick={() => createRequestMutation.mutate()}
                   disabled={createRequestMutation.isPending}
-                  className="w-full text-caption h-11"
+                  className="w-full text-xs font-bold bg-[#3C315B] hover:bg-[#2D2447] text-white rounded-2xl h-11 shadow-sm"
                 >
                   <Send className="mr-2 h-4 w-4" />
                   {createRequestMutation.isPending
                     ? 'Submitting Request...'
                     : selectedBedId
-                    ? 'Request Selected Bed'
-                    : 'Request Room Allocation'}
+                      ? 'Request Selected Bed'
+                      : 'Request Room Allocation'}
                 </Button>
               )}
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>

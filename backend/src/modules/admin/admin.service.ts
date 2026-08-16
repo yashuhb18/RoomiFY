@@ -12,7 +12,7 @@ export class AdminService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly mailService: MailService,
-  ) {}
+  ) { }
 
   async getPlatformMetrics() {
     try {
@@ -584,7 +584,7 @@ export class AdminService {
       // 5. Send Eviction Email Notification (fire-and-forget)
       if (student.email) {
         const studentName = (student.profile as any)?.fullName || '';
-        this.mailService.sendStudentEvictionEmail(student.email, studentName, evictionReason).catch(() => {});
+        this.mailService.sendStudentEvictionEmail(student.email, studentName, evictionReason).catch(() => { });
       }
 
       return {
@@ -624,7 +624,7 @@ export class AdminService {
     // Send Suspension Notification Email (fire-and-forget)
     if (student.email) {
       const studentName = (student.profile as any)?.fullName || '';
-      this.mailService.sendStudentSuspensionEmail(student.email, studentName, isSuspended, reason).catch(() => {});
+      this.mailService.sendStudentSuspensionEmail(student.email, studentName, isSuspended, reason).catch(() => { });
     }
 
     return {

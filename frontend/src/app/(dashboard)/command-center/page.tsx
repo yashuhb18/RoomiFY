@@ -176,21 +176,19 @@ export default function CommandHubOverview() {
                 <div className="flex items-center gap-1.5 bg-[#F8FAFC] p-1 rounded-xl border border-[#E2E8F0] text-xs font-semibold">
                   <button
                     onClick={() => setChartTab('activity')}
-                    className={`px-3 py-1 rounded-lg transition-all ${
-                      chartTab === 'activity'
+                    className={`px-3 py-1 rounded-lg transition-all ${chartTab === 'activity'
                         ? 'bg-[#1D2786] text-white shadow-sm font-bold'
                         : 'text-[#64748B] hover:text-[#0F172A]'
-                    }`}
+                      }`}
                   >
                     Student Activity
                   </button>
                   <button
                     onClick={() => setChartTab('revenue')}
-                    className={`px-3 py-1 rounded-lg transition-all ${
-                      chartTab === 'revenue'
+                    className={`px-3 py-1 rounded-lg transition-all ${chartTab === 'revenue'
                         ? 'bg-[#1D2786] text-white shadow-sm font-bold'
                         : 'text-[#64748B] hover:text-[#0F172A]'
-                    }`}
+                      }`}
                   >
                     Revenue
                   </button>

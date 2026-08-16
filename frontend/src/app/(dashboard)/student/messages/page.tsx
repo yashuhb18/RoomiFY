@@ -6,6 +6,7 @@ import {
   MessageSquare, Send, RefreshCw, CheckCheck, Megaphone, User, Building2
 } from 'lucide-react';
 import api from '@/lib/axios';
+import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +14,7 @@ import { toast } from 'sonner';
 
 export default function StudentMessagesPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
   const [messageText, setMessageText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -112,32 +114,30 @@ export default function StudentMessagesPage() {
             </div>
           ) : messages && messages.length > 0 ? (
             messages.map((msg: any) => {
-              const isStudent = msg.senderRole === 'STUDENT';
+              const isMe = user?.id ? msg.senderId === user.id : (msg.sender?.role === 'STUDENT' || msg.senderRole === 'STUDENT');
               return (
                 <div
                   key={msg.id}
-                  className={`flex flex-col ${isStudent ? 'items-end' : 'items-start'}`}
+                  className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
                 >
                   <div
-                    className={`max-w-[75%] p-4 rounded-2xl text-xs leading-relaxed shadow-sm ${
-                      isStudent
+                    className={`max-w-[75%] p-4 rounded-2xl text-xs leading-relaxed shadow-sm ${isMe
                         ? 'bg-[#3C315B] text-white rounded-br-none'
                         : 'bg-white border border-[#E5E4E8] text-[#3C315B] rounded-bl-none'
-                    }`}
+                      }`}
                   >
                     <p className="font-semibold text-[10px] opacity-80 mb-1">
-                      {isStudent ? 'You (Student)' : 'Warden Administration'}
+                      {isMe ? 'You (Resident Student)' : 'Warden Administration'}
                     </p>
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                     <div
-                      className={`mt-1.5 text-[9px] flex items-center gap-1 justify-end ${
-                        isStudent ? 'text-white/70' : 'text-[#3C315B]/50'
-                      }`}
+                      className={`mt-1.5 text-[9px] flex items-center gap-1 justify-end ${isMe ? 'text-white/70' : 'text-[#3C315B]/50'
+                        }`}
                     >
                       <span>
                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
-                      {isStudent && <CheckCheck className="w-3 h-3 text-[#2EC08B]" />}
+                      {isMe && <CheckCheck className="w-3 h-3 text-[#2EC08B]" />}
                     </div>
                   </div>
                 </div>

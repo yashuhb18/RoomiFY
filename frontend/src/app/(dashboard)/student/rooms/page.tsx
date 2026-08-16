@@ -62,76 +62,123 @@ export default function StudentExploreRoomsPage() {
   ) || 0;
 
   return (
-    <div className="space-y-8 pb-12">
-      <PageHero
-        mode="bone"
-        icon={Building2}
-        badges={['Hostel Inventory Discovery', 'Real-Time Availability']}
-        title="Explore Available Hostel Rooms"
-        description="Browse available rooms, examine bed arrangements, inspect room conditions, and select your preferred room."
-      />
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Available Rooms"
-          value={availableRooms?.length || 0}
-          sublabel="Vacant or partial rooms"
-          icon={Building2}
-          accent="cornflower"
-          index={0}
-        />
-        <StatCard
-          label="Available Beds"
-          value={totalAvailableBeds}
-          sublabel="Ready for allocation"
-          icon={Users}
-          accent="lavender"
-          index={1}
-        />
-        <StatCard
-          label="Hostel Floors"
-          value={floors?.length || 3}
-          sublabel="Multi-level layout"
-          icon={Layers}
-          accent="periwinkle"
-          index={2}
-        />
-        <StatCard
-          label="Verified Photos"
-          value="100%"
-          sublabel="Warden approved"
-          icon={CheckCircle2}
-          accent="mint"
-          index={3}
-        />
+    <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
+      {/* Hero Banner Card */}
+      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-3 shadow-sm border border-[#E5E4E8]">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="px-3.5 py-1 rounded-full bg-[#3C315B] text-white text-[11px] font-semibold tracking-wide shadow-sm">
+            Hostel Inventory Discovery
+          </span>
+          <span className="px-3.5 py-1 rounded-full bg-[#3C315B] text-white text-[11px] font-semibold tracking-wide shadow-sm">
+            Real-Time Availability
+          </span>
+        </div>
+        <h1 className="text-3xl font-bold text-[#3C315B] tracking-tight pt-1">
+          Explore Available Hostel Rooms
+        </h1>
+        <p className="text-xs text-[#3C315B]/70 max-w-2xl leading-relaxed font-normal">
+          Browse available rooms, examine bed arrangements, inspect room conditions, and select your preferred room.
+        </p>
       </div>
 
-      {/* Filter Toolbar */}
-      <Card className="p-4 bg-bone/60 border border-ash space-y-4">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-2 text-aubergine text-caption font-light tracking-phantom">
-            <Filter className="h-4 w-4 text-cornflower-pop" /> Filter Rooms
+      {/* 4 Stat Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-3xl bg-white p-6 border border-[#E5E4E8] shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[10px] font-bold text-[#3C315B]/60 tracking-wider uppercase block">
+              AVAILABLE ROOMS
+            </span>
+            <p className="text-3xl font-extrabold text-[#3C315B]">
+              {availableRooms?.length || 0}
+            </p>
+            <span className="text-[11px] text-[#3C315B]/50 font-normal block">
+              Vacant or partial rooms
+            </span>
           </div>
-          <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-fog" />
-            <Input
+          <div className="w-12 h-12 rounded-full bg-[#ECE8FE] text-[#6A4FE0] flex items-center justify-center shrink-0">
+            <Building2 className="h-6 w-6" />
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 border border-[#E5E4E8] shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[10px] font-bold text-[#3C315B]/60 tracking-wider uppercase block">
+              AVAILABLE BEDS
+            </span>
+            <p className="text-3xl font-extrabold text-[#3C315B]">
+              {totalAvailableBeds}
+            </p>
+            <span className="text-[11px] text-[#3C315B]/50 font-normal block">
+              Ready for allocation
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-[#ECE8FE] text-[#6A4FE0] flex items-center justify-center shrink-0">
+            <Users className="h-6 w-6" />
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 border border-[#E5E4E8] shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[10px] font-bold text-[#3C315B]/60 tracking-wider uppercase block">
+              HOSTEL FLOORS
+            </span>
+            <p className="text-3xl font-extrabold text-[#3C315B]">
+              {floors?.length || 3}
+            </p>
+            <span className="text-[11px] text-[#3C315B]/50 font-normal block">
+              Multi-level layout
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-[#ECE8FE] text-[#6A4FE0] flex items-center justify-center shrink-0">
+            <Layers className="h-6 w-6" />
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-white p-6 border border-[#E5E4E8] shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[10px] font-bold text-[#3C315B]/60 tracking-wider uppercase block">
+              VERIFIED PHOTOS
+            </span>
+            <p className="text-3xl font-extrabold text-[#3C315B]">
+              100%
+            </p>
+            <span className="text-[11px] text-[#3C315B]/50 font-normal block">
+              Warden approved
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-[#E6F9F0] text-[#2EC08B] flex items-center justify-center shrink-0">
+            <CheckCircle2 className="h-6 w-6" />
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Toolbar Card */}
+      <div className="rounded-3xl bg-[#ECE8FE]/60 p-6 border border-[#E5E4E8] space-y-4 shadow-sm">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-2 text-[#3C315B] font-bold text-sm">
+            <Filter className="h-4 w-4 text-[#6A4FE0]" /> Filter Rooms
+          </div>
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#3C315B]/50" />
+            <input
+              type="text"
               placeholder="Search room number..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9 text-caption"
+              className="w-full h-10 pl-10 pr-4 bg-white border border-[#E5E4E8] text-[#3C315B] placeholder:text-[#3C315B]/50 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="text-[11px] text-fog font-light tracking-phantom block mb-1">
+            <label className="text-[11px] text-[#3C315B]/70 font-semibold block mb-1">
               Floor Level
             </label>
             <select
               value={selectedFloor}
               onChange={(e) => setSelectedFloor(e.target.value)}
-              className="w-full h-9 rounded-md border border-ash bg-white px-3 text-caption text-aubergine focus:outline-none focus:ring-1 focus:ring-aubergine"
+              className="w-full h-11 rounded-2xl border border-[#E5E4E8] bg-white px-4 text-xs font-semibold text-[#3C315B] focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
             >
               <option value="all">All Floors</option>
               {floors?.map((f: any) => (
@@ -139,21 +186,21 @@ export default function StudentExploreRoomsPage() {
                   {f.name || `Floor ${f.floorNumber}`}
                 </option>
               )) || [
-                <option key="0" value="0">Ground Floor</option>,
-                <option key="1" value="1">First Floor</option>,
-                <option key="2" value="2">Second Floor</option>,
-              ]}
+                  <option key="0" value="0">Ground Floor</option>,
+                  <option key="1" value="1">First Floor</option>,
+                  <option key="2" value="2">Second Floor</option>,
+                ]}
             </select>
           </div>
 
           <div>
-            <label className="text-[11px] text-fog font-light tracking-phantom block mb-1">
+            <label className="text-[11px] text-[#3C315B]/70 font-semibold block mb-1">
               Room Type
             </label>
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full h-9 rounded-md border border-ash bg-white px-3 text-caption text-aubergine focus:outline-none focus:ring-1 focus:ring-aubergine"
+              className="w-full h-11 rounded-2xl border border-[#E5E4E8] bg-white px-4 text-xs font-semibold text-[#3C315B] focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
             >
               <option value="all">All Room Types</option>
               <option value="SINGLE">Single Bed</option>
@@ -164,13 +211,13 @@ export default function StudentExploreRoomsPage() {
           </div>
 
           <div>
-            <label className="text-[11px] text-fog font-light tracking-phantom block mb-1">
+            <label className="text-[11px] text-[#3C315B]/70 font-semibold block mb-1">
               Condition
             </label>
             <select
               value={selectedCondition}
               onChange={(e) => setSelectedCondition(e.target.value)}
-              className="w-full h-9 rounded-md border border-ash bg-white px-3 text-caption text-aubergine focus:outline-none focus:ring-1 focus:ring-aubergine"
+              className="w-full h-11 rounded-2xl border border-[#E5E4E8] bg-white px-4 text-xs font-semibold text-[#3C315B] focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
             >
               <option value="all">All Conditions</option>
               <option value="EXCELLENT">Excellent</option>
@@ -179,7 +226,7 @@ export default function StudentExploreRoomsPage() {
             </select>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Rooms Grid */}
       {isLoading ? (
