@@ -1,5 +1,6 @@
 'use client';
 
+// RoomiFY Resident Registration Page Component
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -28,10 +29,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { PasswordStrengthMeter } from '@/components/common/PasswordStrengthMeter';
 
 const registerSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: z.string().min(12, 'Password must be at least 12 characters'),
   confirmPassword: z.string(),
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
   phone: z.string().min(10, 'Please enter a valid 10-digit phone number'),
@@ -211,17 +213,20 @@ export default function RegisterPage() {
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-[#3C315B] flex items-center gap-1.5">
-                        <Lock className="h-3.5 w-3.5 text-[#6A4FE0]" /> Password
+                        <Lock className="h-3.5 w-3.5 text-[#6A4FE0]" /> Password (Min 12 Characters)
                       </label>
                       <input
                         {...register('password')}
                         type="password"
-                        placeholder="••••••••"
+                        placeholder="••••••••••••"
                         className="w-full h-11 px-4 rounded-xl border border-[#E5E4E8] bg-white text-[#3C315B] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
                       />
                       {errors.password && (
                         <p className="text-xs text-red-500 font-medium">{errors.password.message}</p>
                       )}
+                      <div className="pt-1">
+                        <PasswordStrengthMeter password={watch('password') || ''} />
+                      </div>
                     </div>
 
                     <div className="space-y-1.5">
@@ -231,9 +236,24 @@ export default function RegisterPage() {
                       <input
                         {...register('confirmPassword')}
                         type="password"
-                        placeholder="••••••••"
+                        placeholder="••••••••••••"
                         className="w-full h-11 px-4 rounded-xl border border-[#E5E4E8] bg-white text-[#3C315B] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
                       />
+                      {watch('confirmPassword') && watch('confirmPassword').length > 0 && (
+                        <div className={`text-xs font-semibold flex items-center gap-1.5 pt-1 ${
+                          watch('password') === watch('confirmPassword') ? 'text-emerald-600' : 'text-red-500'
+                        }`}>
+                          {watch('password') === watch('confirmPassword') ? (
+                            <>
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Passwords match
+                            </>
+                          ) : (
+                            <>
+                              <AlertCircle className="w-3.5 h-3.5 text-red-500" /> Passwords do not match
+                            </>
+                          )}
+                        </div>
+                      )}
                       {errors.confirmPassword && (
                         <p className="text-xs text-red-500 font-medium">{errors.confirmPassword.message}</p>
                       )}

@@ -46,22 +46,22 @@ export default function StudentDashboardPage() {
 
   return (
     <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
-      {/* Welcome Hero Banner Card — Light Lavender #ECE8FE */}
-      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-4 shadow-sm border border-[#E5E4E8]">
+      {/* Welcome Hero Banner Card — Richer Lavender #D7CBFE */}
+      <div className="rounded-[28px] bg-[#D7CBFE] p-7 md:p-8 space-y-4 shadow-sm border border-[#B7A6F6]">
         <div className="space-y-2 max-w-2xl">
           <div className="flex items-center gap-2">
-            <span className="inline-block px-3 py-1 rounded-full bg-[#EDEAFD] text-[#3C315B] text-[11px] font-semibold tracking-wide">
+            <span className="inline-block px-3.5 py-1 rounded-full bg-[#EDEAFD] text-[#3C315B] text-xs font-semibold tracking-wide">
               Student Portal Active
             </span>
-            <span className="inline-block px-3 py-1 rounded-full bg-[#E6F9F0] text-[#2EC08B] text-[11px] font-semibold tracking-wide">
+            <span className="inline-block px-3.5 py-1 rounded-full bg-[#E6F9F0] text-[#2EC08B] text-xs font-semibold tracking-wide">
               Tenant Isolated
             </span>
           </div>
 
-          <h1 className="text-3xl font-bold text-[#3C315B] tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#3C315B] tracking-tight">
             Welcome back, {user?.email?.split('@')[0]} 👋
           </h1>
-          <p className="text-xs text-[#3C315B]/70 leading-relaxed font-normal">
+          <p className="text-sm text-[#3C315B]/80 leading-relaxed font-medium">
             Manage room allocations, request maintenance support with SLA prediction, and find your ideal roommate.
           </p>
 
@@ -69,25 +69,25 @@ export default function StudentDashboardPage() {
             <Link href="/student/tickets">
               <button
                 type="button"
-                className="px-4 py-2 rounded-full bg-[#3C315B] hover:bg-[#2D2447] text-white font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5"
+                className="px-4 py-2.5 rounded-full bg-[#3C315B] hover:bg-[#2D2447] text-white font-semibold text-sm transition-all shadow-sm flex items-center gap-1.5"
               >
-                <Ticket className="w-3.5 h-3.5 text-[#AB9FF2]" /> Raise Ticket
+                <Ticket className="w-4 h-4 text-[#AB9FF2]" /> Raise Ticket
               </button>
             </Link>
             <Link href="/student/match">
               <button
                 type="button"
-                className="px-4 py-2 rounded-full bg-white text-[#3C315B] font-semibold text-xs border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-1.5 shadow-sm"
+                className="px-4 py-2.5 rounded-full bg-white text-[#3C315B] font-semibold text-sm border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-1.5 shadow-sm"
               >
-                <Users className="w-3.5 h-3.5 text-[#6A4FE0]" /> Match Roommates
+                <Users className="w-4 h-4 text-[#6A4FE0]" /> Match Roommates
               </button>
             </Link>
             <Link href="/student/marketplace">
               <button
                 type="button"
-                className="px-4 py-2 rounded-full bg-white text-[#3C315B] font-semibold text-xs border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-1.5 shadow-sm"
+                className="px-4 py-2.5 rounded-full bg-white text-[#3C315B] font-semibold text-sm border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-1.5 shadow-sm"
               >
-                <ShoppingBag className="w-3.5 h-3.5 text-[#2EC08B]" /> Marketplace
+                <ShoppingBag className="w-4 h-4 text-[#2EC08B]" /> Marketplace
               </button>
             </Link>
           </div>

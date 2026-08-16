@@ -18,9 +18,9 @@ interface PageHeroProps {
 }
 
 const modeStyles: Record<SectionMode, string> = {
-  light: 'bg-white border-[#E5E0F6] text-aubergine shadow-[0_4px_20px_rgba(60,49,91,0.05)]',
-  bone: 'bg-[#F2EDFF] border-[#E0D8FB] text-aubergine shadow-[0_4px_20px_rgba(60,49,91,0.04)]',
-  dark: 'bg-aubergine border-aubergine text-paper-white',
+  light: 'bg-white border-[#E5E0F6] text-[#3C315B] shadow-[0_4px_20px_rgba(60,49,91,0.05)]',
+  bone: 'bg-[#D7CBFE] border-[#B7A6F6] text-[#3C315B] shadow-sm',
+  dark: 'bg-[#3C315B] border-[#3C315B] text-white',
 };
 
 export function PageHero({
