@@ -2,10 +2,12 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../decorators';
+import { AuthService } from '../../modules/auth/auth.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -26,7 +28,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest<TUser = any>(err: any, user: TUser, info: any): TUser {
+  handleRequest<TUser = any>(err: any, user: any, info: any): TUser {
     if (err || !user) {
       throw (
         err ||
@@ -35,6 +37,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         )
       );
     }
+
+    if (AuthService.getLockdownState() && user.role !== 'SUPER_ADMIN') {
+      throw new ServiceUnavailableException(
+        '🚨 AEGIS Infrastructure Emergency Lockdown Active. Platform access temporarily restricted.',
+      );
+    }
+
     return user;
   }
 }

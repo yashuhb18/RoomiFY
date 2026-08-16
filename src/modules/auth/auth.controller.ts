@@ -260,4 +260,59 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
   }
+
+  // -------------------------------------------------------------
+  // SUPER & ULTRA SUPER LEVEL SECURITY ENDPOINTS
+  // -------------------------------------------------------------
+  @Post('step-up-verify')
+  @HttpCode(HttpStatus.OK)
+  async stepUpVerify(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: { password: string },
+  ) {
+    return this.authService.stepUpVerify(user.sub, body.password);
+  }
+
+  @Get('sessions')
+  async getSessions(
+    @CurrentUser() user: JwtPayload,
+    @Req() req: Request,
+  ) {
+    return this.authService.getActiveSessions(
+      user.sub,
+      req.ip,
+      req.get('user-agent'),
+    );
+  }
+
+  @Post('sessions/revoke')
+  @HttpCode(HttpStatus.OK)
+  async revokeSession(
+    @CurrentUser() user: JwtPayload,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.revokeSession(user.sub);
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+    return result;
+  }
+
+  @Post('lockdown')
+  @HttpCode(HttpStatus.OK)
+  async toggleLockdown(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: { isLockdown: boolean; masterKey: string },
+  ) {
+    return this.authService.toggleLockdown(user.sub, body.isLockdown, body.masterKey);
+  }
+
+  @Public()
+  @Get('lockdown-status')
+  async getLockdownStatus() {
+    return { lockdownActive: AuthService.getLockdownState() };
+  }
 }
