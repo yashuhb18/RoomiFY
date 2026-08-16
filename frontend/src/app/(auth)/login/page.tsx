@@ -213,25 +213,16 @@ function LoginFormContent() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="space-y-5"
         >
-          {/* Quick Sign-In Pills */}
+          {/* Quick Sign-In Pill for Student */}
           <div className="rounded-2xl border border-[#E5E4E8] bg-white p-3 flex items-center justify-between gap-2 shadow-sm text-xs font-medium text-[#3C315B]">
             <span className="text-[#3C315B]/60 pl-2">Quick Sign-In:</span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setDemoCredentials('student')}
-                className="px-3 py-1.5 rounded-xl bg-[#EDEAFD] hover:bg-[#D6CDFE] text-[#3C315B] font-semibold transition-colors flex items-center gap-1.5"
-              >
-                <UserCheck className="w-3.5 h-3.5" /> Student
-              </button>
-              <button
-                type="button"
-                onClick={() => setDemoCredentials('warden')}
-                className="px-3 py-1.5 rounded-xl bg-[#EDEAFD] hover:bg-[#D6CDFE] text-[#3C315B] font-semibold transition-colors flex items-center gap-1.5"
-              >
-                <Building2 className="w-3.5 h-3.5" /> Warden
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setDemoCredentials('student')}
+              className="px-3 py-1.5 rounded-xl bg-[#EDEAFD] hover:bg-[#D6CDFE] text-[#3C315B] font-semibold transition-colors flex items-center gap-1.5"
+            >
+              <UserCheck className="w-3.5 h-3.5" /> Student
+            </button>
           </div>
 
           {/* Main Card */}
