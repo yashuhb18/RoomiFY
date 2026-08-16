@@ -1,1 +1,2 @@
-export { default } from '../../../(auth)/mfa-setup/page';
+import MfaSetupPage from '@/app/(auth)/mfa-setup/page';
+export default MfaSetupPage;
