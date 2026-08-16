@@ -49,82 +49,83 @@ export default function WardenTicketsPage() {
   });
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="border-purple-500/40 text-purple-300 font-mono text-[10px] uppercase">
+    <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
+      {/* Hero Banner Card */}
+      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-3 shadow-sm border border-[#E5E4E8]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <span className="px-3.5 py-1 rounded-full bg-[#3C315B] text-white text-[11px] font-semibold tracking-wide">
               Predictive SLA Maintenance Engine
-            </Badge>
+            </span>
+            <h1 className="text-3xl font-bold text-[#3C315B] tracking-tight flex items-center gap-2 pt-1">
+              <Ticket className="h-7 w-7 text-[#6A4FE0]" /> SLA &amp; Support Ticket Control
+            </h1>
+            <p className="text-xs text-[#3C315B]/70 max-w-xl font-normal">
+              Monitor automated SLA breach risks, assign maintenance staff, and update ticket lifecycle status.
+            </p>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
-            SLA &amp; Support Ticket Control
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Monitor automated SLA breach risks, assign maintenance staff, and update ticket lifecycle status.
-          </p>
-        </div>
 
-        <Button
-          variant="outline"
-          onClick={() => refetch()}
-          className="border-white/15 hover:bg-white/5"
-        >
-          <RefreshCw className="mr-2 h-4 w-4 text-purple-400" /> Refresh Tickets
-        </Button>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="px-4 py-2 rounded-full bg-white text-[#3C315B] font-semibold text-xs border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-2 shadow-sm w-fit"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh Tickets
+          </button>
+        </div>
       </div>
 
       {/* SLA Breach Warning Banner */}
       {breachRisks && breachRisks.length > 0 && (
-        <Card className="rounded-3xl border border-rose-500/40 bg-rose-950/20 shadow-xl shadow-rose-500/10 p-6 space-y-3">
-          <div className="flex items-center gap-2 text-rose-400 font-bold text-base">
-            <AlertTriangle className="h-5 w-5 animate-bounce" /> Predictive SLA Breach Risk Warning
+        <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 space-y-2 shadow-sm">
+          <div className="flex items-center gap-2 text-rose-700 font-bold text-base">
+            <AlertTriangle className="h-5 w-5 text-rose-600" /> Predictive SLA Breach Risk Warning
           </div>
-          <p className="text-xs text-rose-300/80 leading-relaxed">
+          <p className="text-xs text-rose-700/80 leading-relaxed font-normal">
             The predictive model identified {breachRisks.length} tickets with estimated resolution time exceeding maximum SLA policy threshold.
           </p>
-        </Card>
+        </div>
       )}
 
-      {/* Ticket Table */}
-      <Card className="rounded-3xl border border-white/10 bg-[#1A1A1A]/80 backdrop-blur-xl p-6">
+      {/* Ticket Table Card */}
+      <div className="rounded-3xl border border-[#E5E4E8] bg-white p-6 shadow-sm">
         {isLoading ? (
-          <p className="text-xs text-muted-foreground text-center py-8">Loading ticket system...</p>
+          <p className="text-xs text-[#3C315B]/60 text-center py-8">Loading ticket system...</p>
         ) : tickets && tickets.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="font-mono text-xs">Category</TableHead>
-                <TableHead className="font-mono text-xs">Description</TableHead>
-                <TableHead className="font-mono text-xs">SLA Deadline</TableHead>
-                <TableHead className="font-mono text-xs">Breach Risk</TableHead>
-                <TableHead className="font-mono text-xs">Status</TableHead>
-                <TableHead className="font-mono text-xs text-right">Action</TableHead>
+                <TableHead className="text-xs font-semibold text-[#3C315B]">CATEGORY</TableHead>
+                <TableHead className="text-xs font-semibold text-[#3C315B]">DESCRIPTION</TableHead>
+                <TableHead className="text-xs font-semibold text-[#3C315B]">SLA DEADLINE</TableHead>
+                <TableHead className="text-xs font-semibold text-[#3C315B]">BREACH RISK</TableHead>
+                <TableHead className="text-xs font-semibold text-[#3C315B]">STATUS</TableHead>
+                <TableHead className="text-xs font-semibold text-[#3C315B] text-right">ACTION</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {tickets.map((t: any) => (
-                <TableRow key={t.id} className={t.breachRisk ? 'bg-rose-950/15' : ''}>
-                  <TableCell className="font-bold text-white capitalize">{t.category}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
+                <TableRow key={t.id} className={t.breachRisk ? 'bg-rose-50/50' : 'hover:bg-[#FAFAFA]'}>
+                  <TableCell className="font-bold text-[#3C315B] capitalize text-xs">{t.category}</TableCell>
+                  <TableCell className="text-xs text-[#3C315B]/70 max-w-xs truncate font-medium">
                     {t.description}
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-purple-300">
+                  <TableCell className="text-xs text-[#6A4FE0] font-semibold">
                     {new Date(t.slaDeadline).toLocaleString()}
                   </TableCell>
                   <TableCell>
                     {t.breachRisk ? (
-                      <Badge variant="destructive" className="text-[10px]">
+                      <Badge variant="destructive" className="bg-rose-100 text-rose-700 font-bold border-rose-200 text-[10px]">
                         HIGH RISK
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30">
+                      <Badge variant="outline" className="bg-emerald-50 text-emerald-700 font-bold border-emerald-200 text-[10px]">
                         NORMAL
                       </Badge>
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className="text-[10px] font-mono">
+                    <Badge variant="secondary" className="bg-[#ECE8FE] text-[#3C315B] font-bold text-[10px]">
                       {t.status}
                     </Badge>
                   </TableCell>
@@ -135,12 +136,12 @@ export default function WardenTicketsPage() {
                         onClick={() =>
                           updateStatusMutation.mutate({ ticketId: t.id, status: 'RESOLVED' })
                         }
-                        className="rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs h-8 px-4"
+                        className="rounded-full bg-[#2EC08B] hover:bg-[#28A87A] text-white font-bold text-xs h-8 px-4 shadow-sm"
                       >
                         <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Resolve
                       </Button>
                     ) : (
-                      <span className="text-xs font-mono text-emerald-400 font-semibold">Resolved</span>
+                      <span className="text-xs text-[#2EC08B] font-bold">Resolved</span>
                     )}
                   </TableCell>
                 </TableRow>
@@ -148,11 +149,11 @@ export default function WardenTicketsPage() {
             </TableBody>
           </Table>
         ) : (
-          <p className="text-xs text-muted-foreground text-center py-8">
+          <p className="text-xs text-[#3C315B]/60 text-center py-8">
             No support tickets reported.
           </p>
         )}
-      </Card>
+      </div>
     </div>
   );
 }

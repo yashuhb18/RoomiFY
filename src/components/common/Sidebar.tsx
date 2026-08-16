@@ -172,33 +172,38 @@ export function Sidebar() {
 
   return (
     <aside className="w-56 shrink-0 bg-[#EDEAFD] hidden md:flex flex-col min-h-[calc(100vh-4rem)] p-4 justify-between border-r border-[#E5E4E8]/60">
-      <nav className="space-y-1">
-        {filteredItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
+      <div>
+        <div className="px-4 text-[10px] font-bold text-[#3C315B]/50 tracking-wider mb-2 uppercase">
+          MENU
+        </div>
+        <nav className="space-y-1">
+          {filteredItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition-all',
-                isActive
-                  ? 'bg-[#ECE8FE] text-[#3C315B]'
-                  : 'text-[#3C315B]/70 hover:bg-white/60 hover:text-[#3C315B]',
-              )}
-            >
-              <Icon
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
                 className={cn(
-                  'h-4 w-4',
-                  isActive ? 'text-[#6A4FE0]' : 'text-[#3C315B]/50',
+                  'flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition-all',
+                  isActive
+                    ? 'bg-[#ECE8FE] text-[#3C315B] shadow-sm'
+                    : 'text-[#3C315B]/70 hover:bg-white/60 hover:text-[#3C315B]',
                 )}
-              />
-              <span>{item.title}</span>
-            </Link>
-          );
-        })}
-      </nav>
+              >
+                <Icon
+                  className={cn(
+                    'h-4 w-4',
+                    isActive ? 'text-[#6A4FE0]' : 'text-[#3C315B]/50',
+                  )}
+                />
+                <span>{item.title}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
 
       {/* RLS Security Footer Card */}
       <div className="p-4 rounded-2xl bg-white border border-[#E5E4E8] space-y-1 text-xs shadow-sm mt-4">

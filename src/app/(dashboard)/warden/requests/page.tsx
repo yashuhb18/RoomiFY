@@ -51,7 +51,11 @@ export default function WardenRoomRequestsPage() {
 
   const approveMutation = useMutation({
     mutationFn: async ({ requestId, bedId }: { requestId: string; bedId: string }) => {
-      const res = await api.patch(`/room-requests/${requestId}/approve`, { bedId });
+      const payload: any = {};
+      if (bedId && bedId !== 'AUTO_BED') {
+        payload.bedId = bedId;
+      }
+      const res = await api.patch(`/room-requests/${requestId}/approve`, payload);
       return res.data;
     },
     onSuccess: () => {
@@ -62,7 +66,16 @@ export default function WardenRoomRequestsPage() {
       setSelectedRequest(null);
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.message || 'Failed to approve request.');
+      const responseData = err.response?.data;
+      let msg = 'Failed to approve request.';
+      if (typeof responseData?.message === 'string') {
+        msg = responseData.message;
+      } else if (Array.isArray(responseData?.message) && responseData.message.length > 0) {
+        msg = responseData.message[0];
+      } else if (err.message) {
+        msg = err.message;
+      }
+      toast.error(msg);
     },
   });
 
@@ -101,21 +114,29 @@ export default function WardenRoomRequestsPage() {
   const rejectedRequests = requests?.filter((r: any) => r.status === 'REJECTED') || [];
 
   return (
-    <div className="relative space-y-8 pb-12">
-      <MeshBackground />
-
-      <PageHero
-        title="Student Room Requests Console"
-        description="Review student room allocation requests, verify bed availability, and execute atomic allocations."
-        badges={['Warden Authority', 'Double-Booking Protected']}
-        icon={ShieldCheck}
-        mode="bone"
-        actions={
-          <Button variant="outline" onClick={() => refetch()} size="sm">
-            <RefreshCw className="mr-2 h-4 w-4" /> Refresh Requests
-          </Button>
-        }
-      />
+    <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
+      {/* Light Purple Hero Banner */}
+      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-3 shadow-sm border border-[#E5E4E8] flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="px-3 py-0.5 rounded-full bg-[#3C315B] text-white font-bold text-[10px]">Warden Authority</span>
+            <span className="px-3 py-0.5 rounded-full bg-[#3C315B] text-white font-bold text-[10px]">Double-Booking Protected</span>
+          </div>
+          <h1 className="text-2xl font-bold text-[#3C315B] tracking-tight flex items-center gap-2">
+            <ShieldCheck className="h-6 w-6 text-[#6A4FE0]" /> Student Room Requests Console
+          </h1>
+          <p className="text-xs text-[#3C315B]/70 max-w-xl font-normal">
+            Review student room allocation requests, verify bed availability, and execute atomic allocations.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="px-4 py-2 rounded-full bg-white text-[#3C315B] font-semibold text-xs border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-2 shadow-sm shrink-0"
+        >
+          <RefreshCw className="h-3.5 w-3.5 text-[#6A4FE0]" /> Refresh Requests
+        </button>
+      </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -152,77 +173,71 @@ export default function WardenRoomRequestsPage() {
         />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <SpotlightCard className="p-6 space-y-4">
-          <h2 className="text-subheading font-light tracking-phantom text-aubergine flex items-center gap-2">
-            <Clock className="h-5 w-5 text-cornflower-pop" /> Pending Student Requests
-          </h2>
+      <div className="rounded-3xl bg-white border border-[#E5E4E8] p-6 shadow-sm space-y-4">
+        <h2 className="text-lg font-bold text-[#3C315B] flex items-center gap-2">
+          <Clock className="h-5 w-5 text-[#6A4FE0]" /> Pending Student Requests
+        </h2>
 
-          {isLoading ? (
-            <p className="text-caption text-fog text-center py-8 animate-pulse">Loading pending requests...</p>
-          ) : pendingRequests.length > 0 ? (
-            <div className="space-y-4">
-              {pendingRequests.map((req: any) => {
-                const availableBeds = req.room?.beds?.filter((b: any) => b.isAvailable) || [];
-                const isRoomFull = req.room?.currentOccupancy >= req.room?.capacity;
+        {isLoading ? (
+          <p className="text-xs text-[#3C315B]/60 text-center py-8 animate-pulse font-normal">Loading pending requests...</p>
+        ) : pendingRequests.length > 0 ? (
+          <div className="space-y-4">
+            {pendingRequests.map((req: any) => {
+              const availableBeds = req.room?.beds?.filter((b: any) => b.isAvailable) || [];
+              const isRoomFull = req.room?.currentOccupancy >= req.room?.capacity;
 
-                return (
-                  <div
-                    key={req.id}
-                    className="p-5 rounded-card bg-bone border border-ash flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-caption"
-                  >
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <span className="font-semibold text-aubergine text-body-sm">
-                          {req.student?.profile?.fullName || req.student?.email}
-                        </span>
-                        <Badge variant="warning" className="text-[10px]">
-                          Pending Review
-                        </Badge>
-                        <span className="text-[11px] text-fog">
-                          Submitted {new Date(req.requestedAt).toLocaleDateString()}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-4 text-fog text-[11px] flex-wrap">
-                        <span>Requested: <strong className="text-aubergine">Room {req.room?.roomNumber}</strong></span>
-                        <span>Capacity: {req.room?.capacity} Beds ({req.room?.currentOccupancy} Occupied)</span>
-                        <span>Vacant Slots: <strong className="text-mint-signal">{Math.max(0, req.room?.capacity - req.room?.currentOccupancy)} Space</strong></span>
-                      </div>
+              return (
+                <div
+                  key={req.id}
+                  className="p-5 rounded-2xl bg-[#FAFAFA] border border-[#E5E4E8] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs"
+                >
+                  <div className="space-y-2 flex-1">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="font-bold text-[#3C315B] text-sm">
+                        {req.student?.profile?.fullName || req.student?.email}
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px]">
+                        Pending Review
+                      </span>
+                      <span className="text-[11px] text-[#3C315B]/50 font-normal">
+                        Submitted {new Date(req.requestedAt).toLocaleDateString()}
+                      </span>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleOpenReject(req)}
-                        className="text-blush-mist hover:bg-blush-mist/10"
-                      >
-                        <X className="mr-1 h-3.5 w-3.5" /> Reject
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => handleOpenApprove(req)}
-                        disabled={isRoomFull}
-                      >
-                        <Check className="mr-1 h-3.5 w-3.5" /> Approve Allocation
-                      </Button>
+                    <div className="flex items-center gap-4 text-[#3C315B]/70 text-xs flex-wrap font-normal">
+                      <span>Requested: <strong className="text-[#3C315B] font-bold">Room {req.room?.roomNumber}</strong></span>
+                      <span>Capacity: {req.room?.capacity} Beds ({req.room?.currentOccupancy} Occupied)</span>
+                      <span>Vacant Slots: <strong className="text-emerald-600 font-bold">{Math.max(0, req.room?.capacity - req.room?.currentOccupancy)} Space</strong></span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-caption text-fog text-center py-8">
-              No pending room requests awaiting review.
-            </p>
-          )}
-        </SpotlightCard>
-      </motion.div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenReject(req)}
+                      className="px-4 py-2 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs border border-rose-200 transition-all flex items-center gap-1.5"
+                    >
+                      <X className="h-3.5 w-3.5" /> Reject
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenApprove(req)}
+                      disabled={isRoomFull}
+                      className="px-4 py-2 rounded-2xl bg-[#3C315B] hover:bg-[#2D2447] text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      <Check className="h-3.5 w-3.5" /> Approve Allocation
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-xs text-[#3C315B]/60 text-center py-8 font-normal">
+            No pending room requests awaiting review.
+          </p>
+        )}
+      </div>
 
       {/* Approve Modal */}
       <Dialog open={approveModalOpen} onOpenChange={setApproveModalOpen}>

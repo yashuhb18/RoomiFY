@@ -68,102 +68,106 @@ export default function StudentTicketsPage() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 gradient-text">
-            <Ticket className="h-6 w-6 text-purple-400" /> Maintenance Tickets
+    <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
+      {/* Hero Banner Card */}
+      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-3 shadow-sm border border-[#E5E4E8] flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-2">
+          <span className="px-3.5 py-1 rounded-full bg-[#3C315B] text-white text-[11px] font-semibold tracking-wide shadow-sm inline-block">
+            SLA Breach Protection Active
+          </span>
+          <h1 className="text-3xl font-bold text-[#3C315B] tracking-tight flex items-center gap-2">
+            <Ticket className="h-7 w-7 text-[#6A4FE0]" /> Maintenance Support Tickets
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Report maintenance issues with automated SLA breach prediction.
+          <p className="text-xs text-[#3C315B]/70 max-w-xl leading-relaxed font-normal">
+            Report maintenance issues with automated SLA breach prediction and real-time tracking.
           </p>
         </div>
-        <Button onClick={() => setIsOpen(true)} className="bg-purple-600 hover:bg-purple-500 text-white">
-          <Plus className="mr-2 h-4 w-4" /> Raise New Ticket
-        </Button>
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="px-5 py-2.5 rounded-full bg-[#3C315B] hover:bg-[#2D2447] text-white text-xs font-bold transition-all shadow-md shrink-0 flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" /> Raise New Ticket
+        </button>
       </div>
 
       {isLoading ? (
-        <p className="text-xs text-muted-foreground">Loading maintenance tickets...</p>
+        <p className="text-xs text-[#3C315B]/60 font-normal">Loading maintenance tickets...</p>
       ) : tickets && tickets.length > 0 ? (
         <div className="grid gap-4">
           {tickets.map((ticket: any) => (
-            <Card key={ticket.id} className="glass border-white/10">
-              <CardContent className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <span className="font-semibold capitalize text-base">{ticket.category}</span>
-                    <Badge
-                      variant={
-                        ticket.status === 'RESOLVED'
-                          ? 'success'
-                          : ticket.breachRisk
-                          ? 'destructive'
-                          : 'warning'
-                      }
-                    >
-                      {ticket.status}
-                    </Badge>
-                    {ticket.breachRisk && (
-                      <Badge variant="destructive" className="animate-pulse">
-                        <AlertCircle className="mr-1 h-3 w-3" /> SLA Risk
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">{ticket.description}</p>
-                  <div className="flex items-center gap-4 text-[11px] font-mono text-muted-foreground/70">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" /> SLA Deadline:{' '}
-                      {new Date(ticket.slaDeadline).toLocaleString()}
+            <div key={ticket.id} className="rounded-3xl bg-white border border-[#E5E4E8] p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-[#3C315B] capitalize text-base">{ticket.category}</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    ticket.status === 'RESOLVED'
+                      ? 'bg-[#E6F9F0] text-[#2EC08B]'
+                      : ticket.breachRisk
+                      ? 'bg-red-50 text-red-600 border border-red-200'
+                      : 'bg-[#ECE8FE] text-[#3C315B]'
+                  }`}>
+                    {ticket.status}
+                  </span>
+                  {ticket.breachRisk && (
+                    <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" /> SLA Risk
                     </span>
-                  </div>
+                  )}
                 </div>
+                <p className="text-xs text-[#3C315B]/70 font-normal">{ticket.description}</p>
+                <div className="flex items-center gap-4 text-[11px] text-[#3C315B]/50">
+                  <span className="flex items-center gap-1 font-medium">
+                    <Clock className="h-3 w-3 text-[#6A4FE0]" /> SLA Deadline:{' '}
+                    {new Date(ticket.slaDeadline).toLocaleString()}
+                  </span>
+                </div>
+              </div>
 
-                {ticket.photoUrl && (
-                  <a
-                    href={ticket.photoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-purple-400 hover:underline shrink-0"
-                  >
-                    View Photo Attachment
-                  </a>
-                )}
-              </CardContent>
-            </Card>
+              {ticket.photoUrl && (
+                <a
+                  href={ticket.photoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 rounded-xl bg-[#ECE8FE] text-[#6A4FE0] text-xs font-bold hover:bg-[#D6CDFE] transition-colors shrink-0"
+                >
+                  View Photo Attachment
+                </a>
+              )}
+            </div>
           ))}
         </div>
       ) : (
-        <Card className="glass border-white/10 p-8 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="rounded-3xl bg-white border border-[#E5E4E8] p-8 text-center shadow-sm">
+          <p className="text-xs text-[#3C315B]/60 font-normal">
             No support tickets raised yet. Click above to submit a request.
           </p>
-        </Card>
+        </div>
       )}
 
       {/* Raise Ticket Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="glass border-white/10">
+        <DialogContent className="rounded-3xl bg-white border border-[#E5E4E8] text-[#3C315B]">
           <DialogHeader>
-            <DialogTitle>Raise Maintenance Ticket</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg font-bold text-[#3C315B]">Raise Maintenance Ticket</DialogTitle>
+            <DialogDescription className="text-xs text-[#3C315B]/60">
               Submit details of the issue. SLA tracking begins automatically.
             </DialogDescription>
           </DialogHeader>
 
           {errorMsg && (
-            <div className="p-3 rounded-lg bg-destructive/15 text-destructive text-xs border border-destructive/30 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" /> {errorMsg}
+            <div className="p-3 rounded-xl bg-red-50 text-red-600 text-xs border border-red-200 flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0" /> {errorMsg}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">Category</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[#3C315B]">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex h-11 w-full rounded-2xl border border-[#E5E4E8] bg-[#FAFAFA] px-4 text-xs font-semibold text-[#3C315B] focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
               >
                 <option value="plumbing">Plumbing (SLA: 24h)</option>
                 <option value="electrical">Electrical (SLA: 12h)</option>
@@ -174,37 +178,37 @@ export default function StudentTicketsPage() {
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">Description</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[#3C315B]">Description</label>
               <textarea
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe the issue in detail..."
-                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex w-full rounded-2xl border border-[#E5E4E8] bg-[#FAFAFA] px-4 py-3 text-xs text-[#3C315B] placeholder:text-[#3C315B]/40 focus:outline-none focus:ring-2 focus:ring-[#AB9FF2]"
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Upload className="h-3.5 w-3.5" /> Attach Photo (Optional, Max 5MB)
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[#3C315B] flex items-center gap-1">
+                <Upload className="h-3.5 w-3.5 text-[#6A4FE0]" /> Attach Photo (Optional, Max 5MB)
               </label>
-              <Input
+              <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setPhoto(e.target.files?.[0] || null)}
-                className="bg-card/50"
+                className="w-full text-xs text-[#3C315B] border border-[#E5E4E8] rounded-xl p-2 bg-[#FAFAFA]"
               />
             </div>
 
-            <Button
+            <button
               type="submit"
               disabled={createTicketMutation.isPending}
-              className="w-full bg-purple-600 hover:bg-purple-500 text-white"
+              className="w-full h-11 rounded-xl bg-[#3C315B] hover:bg-[#2D2447] text-white text-xs font-bold transition-all shadow-md"
             >
               {createTicketMutation.isPending ? 'Submitting...' : 'Submit Ticket'}
-            </Button>
+            </button>
           </form>
         </DialogContent>
       </Dialog>

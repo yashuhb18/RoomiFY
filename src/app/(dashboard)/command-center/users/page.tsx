@@ -65,10 +65,30 @@ export default function UserManagementPage() {
     setUpdating(userId);
     try {
       await api.patch(`/admin/users/${userId}/status`, { isActive: !currentActive });
-      toast.success(currentActive ? 'User suspended' : 'User activated');
+      toast.success(currentActive ? 'Account disabled' : 'Account activated');
       fetchUsers();
     } catch (err: any) {
       toast.error('Status toggle failed: ' + (err.response?.data?.message || 'Error'));
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const handleToggleSuspension = async (userId: string, currentlySuspended: boolean) => {
+    setUpdating(userId);
+    const reason = !currentlySuspended
+      ? prompt('Enter disciplinary suspension reason (optional):') || 'Disciplinary Action'
+      : undefined;
+
+    try {
+      await api.patch(`/admin/users/${userId}/suspend`, {
+        isSuspended: !currentlySuspended,
+        reason,
+      });
+      toast.success(currentlySuspended ? 'Student unsuspended' : 'Student suspended');
+      fetchUsers();
+    } catch (err: any) {
+      toast.error('Suspension toggle failed: ' + (err.response?.data?.message || 'Error'));
     } finally {
       setUpdating(null);
     }
@@ -84,7 +104,7 @@ export default function UserManagementPage() {
             User Management
           </h2>
           <p className="text-xs text-[#64748B] mt-1">
-            Manage roles, access levels, and account status for all users
+            Manage roles, access levels, account active status, and student disciplinary suspensions
           </p>
         </div>
         <button
@@ -150,7 +170,8 @@ export default function UserManagementPage() {
                 <tr>
                   <th className="p-3.5">Email</th>
                   <th className="p-3.5">Role</th>
-                  <th className="p-3.5">Status</th>
+                  <th className="p-3.5">Account Status</th>
+                  <th className="p-3.5">Discipline</th>
                   <th className="p-3.5">MFA</th>
                   <th className="p-3.5">Hostel</th>
                   <th className="p-3.5">Created</th>
@@ -199,11 +220,20 @@ export default function UserManagementPage() {
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
                         user.isActive
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : 'bg-red-50 text-red-700 border border-red-200'
+                          : 'bg-slate-100 text-slate-700 border border-slate-200'
                       }`}>
                         {user.isActive ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                        {user.isActive ? 'Active' : 'Suspended'}
+                        {user.isActive ? 'Active' : 'Disabled'}
                       </span>
+                    </td>
+                    <td className="p-3.5">
+                      {user.isSuspended ? (
+                        <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold inline-flex items-center gap-1">
+                          <UserX className="w-3 h-3" /> Suspended
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-[#94A3B8]">Normal</span>
+                      )}
                     </td>
                     <td className="p-3.5">
                       {user.isMfaEnabled ? (
@@ -221,23 +251,40 @@ export default function UserManagementPage() {
                       {new Date(user.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
                     <td className="p-3.5 text-right">
-                      <button
-                        onClick={() => handleToggleStatus(user.id, user.isActive)}
-                        disabled={updating === user.id}
-                        className={`h-7 px-3 rounded-lg text-[10px] font-bold transition-all ${
-                          user.isActive
-                            ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
-                            : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200'
-                        } disabled:opacity-50`}
-                      >
-                        {updating === user.id ? (
-                          <RefreshCw className="w-3 h-3 animate-spin" />
-                        ) : user.isActive ? (
-                          'Suspend'
-                        ) : (
-                          'Activate'
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => handleToggleStatus(user.id, user.isActive)}
+                          disabled={updating === user.id}
+                          className={`h-7 px-2.5 rounded-lg text-[10px] font-bold transition-all ${
+                            user.isActive
+                              ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300'
+                              : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200'
+                          } disabled:opacity-50`}
+                          title={user.isActive ? 'Disable account access' : 'Activate account access'}
+                        >
+                          {updating === user.id ? (
+                            <RefreshCw className="w-3 h-3 animate-spin" />
+                          ) : user.isActive ? (
+                            'Disable'
+                          ) : (
+                            'Enable'
+                          )}
+                        </button>
+                        {user.role === 'STUDENT' && (
+                          <button
+                            onClick={() => handleToggleSuspension(user.id, user.isSuspended)}
+                            disabled={updating === user.id}
+                            className={`h-7 px-2.5 rounded-lg text-[10px] font-bold transition-all ${
+                              user.isSuspended
+                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300'
+                                : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                            } disabled:opacity-50`}
+                            title={user.isSuspended ? 'Lift suspension' : 'Impose disciplinary suspension'}
+                          >
+                            {user.isSuspended ? 'Unsuspend' : 'Suspend'}
+                          </button>
                         )}
-                      </button>
+                      </div>
                     </td>
                   </motion.tr>
                 ))}
