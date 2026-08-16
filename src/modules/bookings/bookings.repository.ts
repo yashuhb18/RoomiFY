@@ -19,13 +19,32 @@ export class BookingsRepository {
   }
 
   async findByStudent(studentId: string) {
-    return this.prisma.booking.findMany({
+    const bookings = await this.prisma.booking.findMany({
       where: { studentId },
-      include: {
-        room: true,
-      },
+      include: { room: true },
       orderBy: { createdAt: 'desc' },
     });
+
+    const requests = await this.prisma.roomRequest.findMany({
+      where: { studentId },
+      include: { room: true },
+      orderBy: { requestedAt: 'desc' },
+    });
+
+    const mappedRequests = requests.map((r) => ({
+      id: r.id,
+      roomId: r.roomId,
+      studentId: r.studentId,
+      startDate: r.requestedAt,
+      endDate: r.requestedAt,
+      status: r.status === 'PENDING' ? 'PENDING (Warden Review)' : r.status,
+      createdAt: r.requestedAt,
+      room: r.room,
+    }));
+
+    return [...bookings, ...mappedRequests].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   }
 
   async findByHostel(hostelId: string) {
@@ -73,6 +92,27 @@ export class BookingsRepository {
         endDate: allocation.updatedAt,
         status: allocation.status,
         room: allocation.room,
+      };
+    }
+
+    const roomRequest = await this.prisma.roomRequest.findFirst({
+      where: {
+        studentId,
+        status: { in: ['PENDING' as any, 'APPROVED' as any] },
+      },
+      include: { room: true },
+      orderBy: { requestedAt: 'desc' },
+    });
+
+    if (roomRequest) {
+      return {
+        id: roomRequest.id,
+        roomId: roomRequest.roomId,
+        studentId: roomRequest.studentId,
+        startDate: roomRequest.requestedAt,
+        endDate: roomRequest.requestedAt,
+        status: roomRequest.status === 'PENDING' ? 'PENDING (Warden Review)' : roomRequest.status,
+        room: roomRequest.room,
       };
     }
 
