@@ -221,100 +221,118 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* STUDENT ONLY: Roommate Behavioral Profile Card */}
+      {/* STUDENT ONLY: Roommate Behavioral Profile Card (The Symbiotic Strain Model) */}
       {isStudent ? (
         <div className="rounded-3xl bg-white p-7 border border-[#E5E4E8] shadow-sm space-y-5">
           <div className="border-b border-[#E5E4E8] pb-3">
             <h3 className="text-base font-bold text-[#3C315B] flex items-center gap-2">
-              <User className="h-5 w-5 text-[#6A4FE0]" /> Roommate Behavioral Profile
+              <User className="h-5 w-5 text-[#6A4FE0]" /> The Symbiotic Strain Model Profile
             </h3>
             <p className="text-xs text-[#3C315B]/60 font-normal mt-0.5">
-              Updating habits recalibrates compatibility scoring in real-time.
+              Configure co-existence parameters to compute your &quot;Chance of Peaceful Survival&quot;.
             </p>
           </div>
 
           {/* Current Compatibility Parameters Summary Box */}
-          <div className="p-4 rounded-2xl bg-[#FAFAFA] border border-[#E5E4E8] space-y-1.5 text-xs text-[#3C315B]/80 font-medium">
-            <p className="font-bold text-[#3C315B]">Current Compatibility Parameters:</p>
-            <p>&bull; Sleep Schedule: Early Bird / Night Owl vector</p>
-            <p>&bull; Study Habits: Silent focus / Group discussion</p>
-            <p>&bull; Cleanliness Score: High priority</p>
+          <div className="p-4 rounded-2xl bg-[#ECE8FE] border border-[#AB9FF2]/40 space-y-1.5 text-xs text-[#3C315B] font-medium">
+            <p className="font-bold text-[#3C315B]">Symbiotic Strain Parameters:</p>
+            <p>&bull; Peak Energy Window: Dawn / Midday / Dusk / Midnight</p>
+            <p>&bull; Territoriality Index: 1 (Fully Open) to 10 (Strictly Zoned)</p>
+            <p>&bull; Financial Splitting: Equal Split vs Exact Usage</p>
+            <p>&bull; Guest Philosophy: Social Hub vs Private Fortress</p>
           </div>
 
-          {/* Habit Option Pills */}
           <div className="space-y-5">
-            {[
-              {
-                key: 'sleepSchedule',
-                title: 'Sleep Schedule',
-                options: [
-                  { label: 'Early Bird', value: 'early_bird' },
-                  { label: 'Night Owl', value: 'night_owl' },
-                  { label: 'Flexible', value: 'flexible' },
-                ],
-              },
-              {
-                key: 'cleanliness',
-                title: 'Cleanliness Standard',
-                options: [
-                  { label: 'Very Clean', value: 'very_clean' },
-                  { label: 'Moderate', value: 'moderate' },
-                  { label: 'Relaxed', value: 'relaxed' },
-                ],
-              },
-              {
-                key: 'studyStyle',
-                title: 'Study Environment',
-                options: [
-                  { label: 'Silent', value: 'silent' },
-                  { label: 'Background Noise', value: 'background_noise' },
-                  { label: 'Group Study', value: 'group_study' },
-                ],
-              },
-              {
-                key: 'smoking',
-                title: 'Smoking Preference',
-                options: [
-                  { label: 'Non-Smoker', value: 'non_smoker' },
-                  { label: 'Smoker', value: 'smoker' },
-                  { label: 'Outdoor Only', value: 'outdoor_only' },
-                ],
-              },
-              {
-                key: 'music',
-                title: 'Music Preference',
-                options: [
-                  { label: 'Headphones', value: 'headphones' },
-                  { label: 'Speakers', value: 'speakers' },
-                  { label: 'No Music', value: 'no_music' },
-                ],
-              },
-            ].map((field) => (
-              <div key={field.key} className="space-y-2">
-                <label className="text-xs font-bold text-[#3C315B]">{field.title}</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {field.options.map((opt) => {
-                    const isSelected = profileForm[field.key] === opt.value;
-                    return (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() =>
-                          setProfileForm((prev) => ({ ...prev, [field.key]: opt.value }))
-                        }
-                        className={`py-2.5 px-4 rounded-full text-xs font-semibold border transition-all text-center ${
-                          isSelected
-                            ? 'bg-[#ECE8FE] border-[#AB9FF2] text-[#3C315B] shadow-sm'
-                            : 'bg-white border-[#E5E4E8] text-[#3C315B]/70 hover:bg-[#FAFAFA]'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    );
-                  })}
-                </div>
+            {/* 1. Peak Energy Window Dropdown */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[#3C315B]">1. Peak Energy Window</label>
+              <select
+                value={profileForm.peakEnergyWindow || 'dawn'}
+                onChange={(e) => setProfileForm((prev) => ({ ...prev, peakEnergyWindow: e.target.value }))}
+                className="w-full h-11 px-4 rounded-2xl border border-[#E5E4E8] bg-[#FAFAFA] text-xs font-semibold text-[#3C315B] focus:bg-white cursor-pointer"
+              >
+                <option value="dawn">Dawn (5 AM - 9 AM)</option>
+                <option value="midday">Midday (10 AM - 2 PM)</option>
+                <option value="dusk">Dusk (5 PM - 9 PM)</option>
+                <option value="midnight">Midnight (10 PM - 2 AM)</option>
+              </select>
+            </div>
+
+            {/* 2. Territoriality Slider (1-10) */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <label className="font-bold text-[#3C315B]">2. Territoriality Index (1 - 10)</label>
+                <span className="font-extrabold text-[#6A4FE0] bg-[#ECE8FE] px-2.5 py-0.5 rounded-full">
+                  Level {profileForm.territoriality || '5'}
+                </span>
               </div>
-            ))}
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={profileForm.territoriality || '5'}
+                onChange={(e) => setProfileForm((prev) => ({ ...prev, territoriality: e.target.value }))}
+                className="w-full accent-[#6A4FE0] cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-[#3C315B]/60 font-medium">
+                <span>1: Fully Open (Shared Snacks &amp; Chargers)</span>
+                <span>10: Strictly Zoned (Off My Shelf)</span>
+              </div>
+            </div>
+
+            {/* 3. Financial Splitting Style (Single Select) */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[#3C315B]">3. Financial Splitting Style</label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: 'Equal Split (Bill divided by N)', value: 'equal_split' },
+                  { label: 'Exact Usage (I pay what I consume)', value: 'exact_usage' },
+                ].map((opt) => {
+                  const isSelected = (profileForm.financialSplitStyle || 'equal_split') === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setProfileForm((prev) => ({ ...prev, financialSplitStyle: opt.value }))}
+                      className={`p-3 rounded-2xl text-xs font-semibold border transition-all text-center ${
+                        isSelected
+                          ? 'bg-[#ECE8FE] border-[#AB9FF2] text-[#3C315B] shadow-sm font-bold'
+                          : 'bg-white border-[#E5E4E8] text-[#3C315B]/70 hover:bg-[#FAFAFA]'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 4. Guest Philosophy (Toggle) */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[#3C315B]">4. Guest Philosophy</label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: 'Home is a Social Hub', value: 'social_hub' },
+                  { label: 'Home is a Private Fortress', value: 'private_fortress' },
+                ].map((opt) => {
+                  const isSelected = (profileForm.guestPhilosophy || 'social_hub') === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setProfileForm((prev) => ({ ...prev, guestPhilosophy: opt.value }))}
+                      className={`p-3 rounded-2xl text-xs font-semibold border transition-all text-center ${
+                        isSelected
+                          ? 'bg-[#ECE8FE] border-[#AB9FF2] text-[#3C315B] shadow-sm font-bold'
+                          : 'bg-white border-[#E5E4E8] text-[#3C315B]/70 hover:bg-[#FAFAFA]'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <button
               type="button"
@@ -322,7 +340,7 @@ export default function ProfilePage() {
               disabled={updateProfileMutation.isPending}
               className="w-full h-11 rounded-2xl bg-[#342D53] hover:bg-[#251F40] text-white font-bold text-xs shadow-md transition-all mt-4"
             >
-              {updateProfileMutation.isPending ? 'Saving Preferences...' : 'Save Profile Changes'}
+              {updateProfileMutation.isPending ? 'Recalibrating Model...' : 'Save Symbiotic Profile'}
             </button>
           </div>
         </div>
