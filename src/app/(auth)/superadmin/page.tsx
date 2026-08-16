@@ -21,6 +21,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Input } from '@/components/ui/input';
 import { Logo } from '@/components/common/logo';
 import { toast } from 'sonner';
+import { PasskeyPromptModal } from '@/components/auth/PasskeyPromptModal';
+import { EmojiCipherGrid } from '@/components/auth/EmojiCipherGrid';
 
 const superAdminLoginSchema = z.object({
   email: z.string().email('Valid platform owner email required'),
@@ -41,12 +43,26 @@ function SuperAdminLoginContent() {
   });
   const [otpCode, setOtpCode] = useState('');
 
+  const [passkeyState, setPasskeyState] = useState<{ open: boolean; userId: string; userRole: string }>({
+    open: false,
+    userId: '',
+    userRole: '',
+  });
+  const [emojiCipherState, setEmojiCipherState] = useState<{ open: boolean; userId: string }>({
+    open: false,
+    userId: '',
+  });
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<SuperAdminLoginForm>({
     resolver: zodResolver(superAdminLoginSchema),
+    defaultValues: {
+      email: 'owner@aegis.hostel',
+      password: 'SuperAdmin123!',
+    },
   });
 
   const onSubmit = async (data: SuperAdminLoginForm) => {
@@ -57,6 +73,16 @@ function SuperAdminLoginContent() {
 
       if (result?.requiresMfa) {
         setMfaState({ required: true, token: result.mfaToken });
+        setIsLoading(false);
+        return;
+      }
+
+      if (result?.requiresPasskey && result?.pendingUserId) {
+        setPasskeyState({
+          open: true,
+          userId: result.pendingUserId,
+          userRole: result.userRole || 'SUPER_ADMIN',
+        });
         setIsLoading(false);
         return;
       }
@@ -238,6 +264,34 @@ function SuperAdminLoginContent() {
           </div>
         </motion.div>
       </main>
+
+      {/* Security Modals for Layer 2 & 3 */}
+      <PasskeyPromptModal
+        isOpen={passkeyState.open}
+        userId={passkeyState.userId}
+        userRole={passkeyState.userRole}
+        onSuccess={(res) => {
+          setPasskeyState({ open: false, userId: '', userRole: '' });
+          if (res.requiresEmojiCipher) {
+            setEmojiCipherState({ open: true, userId: passkeyState.userId });
+          } else {
+            toast.success('Passkey Biometric Verified — Accessing Command Hub!');
+            router.push('/command-center');
+          }
+        }}
+        onCancel={() => setPasskeyState({ open: false, userId: '', userRole: '' })}
+      />
+
+      <EmojiCipherGrid
+        isOpen={emojiCipherState.open}
+        userId={emojiCipherState.userId}
+        onSuccess={() => {
+          setEmojiCipherState({ open: false, userId: '' });
+          toast.success('SuperAdmin Emoji Cipher Solved — Access Granted!');
+          router.push('/command-center');
+        }}
+        onCancel={() => setEmojiCipherState({ open: false, userId: '' })}
+      />
 
       {/* Footer */}
       <footer className="relative z-10 p-6 text-center text-xs text-white/20 font-mono">
