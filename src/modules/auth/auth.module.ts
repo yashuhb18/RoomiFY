@@ -4,6 +4,8 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { PasskeyService } from './services/passkey.service';
+import { EmojiCipherService } from './services/emoji-cipher.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { GoogleStrategy, GoogleStartGuard, GoogleCallbackGuard } from './strategies/google.strategy';
@@ -24,7 +26,7 @@ import { AuditModule } from '../audit/audit.module';
     AuditModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, LocalStrategy, GoogleStrategy, GoogleStartGuard, GoogleCallbackGuard],
-  exports: [AuthService, GoogleStartGuard, GoogleCallbackGuard],
+  providers: [AuthService, PasskeyService, EmojiCipherService, JwtStrategy, LocalStrategy, GoogleStrategy, GoogleStartGuard, GoogleCallbackGuard],
+  exports: [AuthService, PasskeyService, EmojiCipherService, GoogleStartGuard, GoogleCallbackGuard],
 })
 export class AuthModule {}

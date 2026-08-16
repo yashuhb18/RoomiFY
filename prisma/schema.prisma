@@ -186,6 +186,11 @@ model User {
   verifiedTasks            TaskCompletion[]  @relation("VerifiedBy")
   userAchievements         UserAchievement[]
 
+  // ─── One in a Million Auth System Relations ─────────────────────────
+  passkeys                 PasskeyCredential[]
+  emojiCipher              EmojiCipher?
+  authChallengeSessions    AuthChallengeSession[]
+
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
@@ -625,4 +630,47 @@ model UserAchievement {
 
   @@unique([userId, achievementId])
   @@map("user_achievements")
+}
+
+// ─── One in a Million Auth System Models ─────────────────────────────
+
+model PasskeyCredential {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credentialId String   @unique @map("credential_id")
+  publicKey    String   @map("public_key")
+  counter      Int      @default(0)
+  deviceType   String   @default("singleDevice") @map("device_type")
+  backedUp     Boolean  @default(false) @map("backed_up")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("passkey_credentials")
+}
+
+model EmojiCipher {
+  id           String   @id @default(uuid())
+  userId       String   @unique @map("user_id")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sequenceHash String   @map("sequence_hash")
+  emojis       Json     // ["🏠", "🌟", "🎯", "💎"]
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("emoji_ciphers")
+}
+
+model AuthChallengeSession {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String   // "PASSKEY" | "EMOJI_CIPHER"
+  challenge  String
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([userId, type])
+  @@map("auth_challenge_sessions")
 }

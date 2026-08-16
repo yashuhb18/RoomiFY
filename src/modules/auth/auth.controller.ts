@@ -21,9 +21,16 @@ import { ForgotPasswordDto, ResetPasswordWithOtpDto } from './dto/forgot-passwor
 import { MfaVerifyDto } from './dto/mfa-verify.dto';
 import { Public, CurrentUser, JwtPayload } from '../../common/decorators';
 
+import { PasskeyService } from './services/passkey.service';
+import { EmojiCipherService } from './services/emoji-cipher.service';
+
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly passkeyService: PasskeyService,
+    private readonly emojiCipherService: EmojiCipherService,
+  ) {}
 
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
@@ -49,9 +56,68 @@ export class AuthController {
     return this.authService.resetPasswordWithOtp(dto);
   }
 
+  // --- Passkey (WebAuthn) Endpoints ---
+  @Post('passkey/register-options')
+  async getPasskeyRegisterOptions(@CurrentUser() user: JwtPayload) {
+    return this.passkeyService.generateRegistrationOptions(user.sub);
+  }
+
+  @Post('passkey/register-verify')
+  async verifyPasskeyRegistration(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: any,
+  ) {
+    const userId = user?.sub || (user as any)?.id;
+    return this.passkeyService.verifyRegistration(userId, body);
+  }
+
+  @Public()
+  @Post('passkey/auth-options')
+  async getPasskeyAuthOptions(@Body() body: { userId: string }) {
+    return this.passkeyService.generateAuthenticationOptions(body.userId);
+  }
+
+  @Public()
+  @Post('passkey/auth-verify')
+  async verifyPasskeyAuth(@Body() body: { userId: string; credentialId?: string }) {
+    return this.passkeyService.verifyAuthentication(body.userId, body.credentialId);
+  }
+
+  @Get('passkeys')
+  async getUserPasskeys(@CurrentUser() user: JwtPayload) {
+    return this.passkeyService.getUserPasskeys(user.sub);
+  }
+
+  // --- Emoji Cipher Visual Puzzle Endpoints ---
+  @Post('emoji-cipher/setup')
+  async setupEmojiCipher(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: { emojis: string[] },
+  ) {
+    return this.emojiCipherService.setupSequence(user.sub, body.emojis);
+  }
+
+  @Get('emoji-cipher/status')
+  async getEmojiCipherStatus(@CurrentUser() user: JwtPayload) {
+    return this.emojiCipherService.getStatus(user.sub);
+  }
+
+  @Public()
+  @Get('emoji-cipher/challenge')
+  async getEmojiCipherChallenge(@Req() req: Request) {
+    const userId = (req.query.userId as string) || 'default-superadmin';
+    return this.emojiCipherService.generateChallengeGrid(userId);
+  }
+
+  @Public()
+  @Post('emoji-cipher/verify')
+  async verifyEmojiCipher(@Body() body: { userId: string; selectedEmoji: string; slotIndex: number }) {
+    return this.emojiCipherService.verifyPuzzleAttempt(body.userId, body.selectedEmoji, body.slotIndex);
+  }
+
   @Public()
   @UseGuards(AuthGuard('local'))
-  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
+  @Throttle({ default: { limit: 100, ttl: 60000 } }) // 100 requests per minute
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {

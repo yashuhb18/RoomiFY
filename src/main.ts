@@ -10,6 +10,11 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
+// Polyfill BigInt serialization for NestJS JSON response formatting
+(BigInt.prototype as any).toJSON = function () {
+  return Number(this.toString());
+};
+
 async function bootstrap() {
   // Create Winston logger instance
   const winstonLogger = WinstonModule.createLogger({
