@@ -307,46 +307,76 @@ export default function RoommateMatchPage() {
                 return (
                   <div
                     key={candidate.userId}
-                    className="rounded-[28px] bg-white p-6 border border-[#E5E4E8] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    className="rounded-[28px] bg-white p-6 border border-[#E5E4E8] shadow-sm space-y-4"
                   >
-                    <div className="flex items-center gap-4">
-                      {/* Avatar Circle Badge */}
-                      <div className="h-12 w-12 rounded-full bg-[#ECE8FE] text-[#3C315B] flex items-center justify-center font-extrabold text-base shrink-0 border border-[#AB9FF2]/30">
-                        #{index + 1}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        {/* Rank Badge */}
+                        <div className="h-12 w-12 rounded-full bg-[#ECE8FE] text-[#3C315B] flex items-center justify-center font-extrabold text-base shrink-0 border border-[#AB9FF2]/30">
+                          #{index + 1}
+                        </div>
+
+                        {/* Candidate Email and Peaceful Survival Score */}
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <h3 className="font-bold text-base text-[#3C315B]">{candidate.email}</h3>
+                            <span className="px-3 py-1 rounded-full bg-[#ECE8FE] text-[#3C315B] text-xs font-extrabold border border-[#AB9FF2]/40">
+                              {candidate.score}% Chance of Peaceful Survival
+                            </span>
+                          </div>
+                          {candidate.matchingTraits && candidate.matchingTraits.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              {candidate.matchingTraits.map((trait: string) => (
+                                <span key={trait} className="px-2.5 py-0.5 rounded-full bg-[#E6F9F0] text-[#2EC08B] text-[10px] font-bold">
+                                  {trait}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Candidate Email and Match Badge */}
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <h3 className="font-bold text-base text-[#3C315B]">{candidate.email}</h3>
-                          <span className="px-3 py-1 rounded-full bg-[#ECE8FE] text-[#3C315B] text-xs font-bold border border-[#AB9FF2]/40">
-                            {candidate.score}% Match
+                      {/* Action Button */}
+                      {existingSentReq ? (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="px-4 py-2 rounded-full bg-[#ECE8FE] text-[#3C315B] text-xs font-bold border border-[#AB9FF2]/40 flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5 text-[#6A4FE0]" /> Request {existingSentReq.status}
                           </span>
                         </div>
-                        <p className="text-xs text-[#3C315B]/60 font-normal">
-                          Shared Traits ({candidate.matchingTraits.length})
-                        </p>
-                      </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => sendRequestMutation.mutate(candidate.userId)}
+                          disabled={sendRequestMutation.isPending}
+                          className="px-5 py-2.5 rounded-full bg-[#6A4FE0] hover:bg-[#5B3FD1] text-white text-xs font-bold transition-all shadow-md shrink-0 flex items-center gap-1.5"
+                        >
+                          <UserPlus className="h-4 w-4" />
+                          {sendRequestMutation.isPending ? 'Sending...' : 'Request Roommate'}
+                        </button>
+                      )}
                     </div>
 
-                    {/* Action Button on Right */}
-                    {existingSentReq ? (
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="px-4 py-2 rounded-full bg-[#ECE8FE] text-[#3C315B] text-xs font-bold border border-[#AB9FF2]/40 flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5 text-[#6A4FE0]" /> Request {existingSentReq.status}
-                        </span>
+                    {/* The 3-Month Forecast Widget */}
+                    <div className={`p-4 rounded-2xl border text-xs space-y-1 shadow-sm ${
+                      candidate.score > 75
+                        ? 'bg-[#E6F9F0] border-emerald-200 text-[#2EC08B]'
+                        : candidate.score >= 50
+                          ? 'bg-amber-50 border-amber-200 text-amber-900'
+                          : 'bg-rose-50 border-rose-200 text-rose-800'
+                    }`}>
+                      <div className="font-bold flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 shrink-0" />
+                        <span>The 3-Month Forecast:</span>
                       </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => sendRequestMutation.mutate(candidate.userId)}
-                        disabled={sendRequestMutation.isPending}
-                        className="px-5 py-2.5 rounded-full bg-[#6A4FE0] hover:bg-[#5B3FD1] text-white text-xs font-bold transition-all shadow-md shrink-0 flex items-center gap-1.5"
-                      >
-                        <UserPlus className="h-4 w-4" />
-                        {sendRequestMutation.isPending ? 'Sending...' : 'Request Roommate'}
-                      </button>
-                    )}
+                      <p className="font-medium text-[11px] leading-relaxed pl-6">
+                        {candidate.forecast ||
+                          (candidate.score > 75
+                            ? 'Low Stress: You two are rhythmically aligned. Expected conflict: Minimal.'
+                            : candidate.score >= 50
+                              ? 'Medium Stress: Compromise needed on finances/guests. Expected conflict: Occasional.'
+                              : 'High Stress: Fundamental lifestyle clash detected. Expected conflict: Weekly.')}
+                      </p>
+                    </div>
                   </div>
                 );
               })}
