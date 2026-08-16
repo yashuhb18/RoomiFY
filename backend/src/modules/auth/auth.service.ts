@@ -502,7 +502,7 @@ export class AuthService implements OnModuleInit {
 
   async login(user: any, ipAddress?: string, userAgent?: string) {
     try {
-      if (user.isMfaEnabled) {
+      if (user.isMfaEnabled && user.role !== Role.WARDEN && user.role !== Role.SUPER_ADMIN) {
         const mfaToken = this.jwtService.sign(
           { sub: user.id, mfaPending: true },
           {

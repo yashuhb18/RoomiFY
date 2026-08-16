@@ -314,4 +314,39 @@ export class UsersService {
       throw new InternalServerErrorException('Failed to change password.');
     }
   }
+
+  async deleteOwnAccount(userId: string, password?: string, hostelId?: string) {
+    try {
+      const user = await this.usersRepository.findById(userId);
+      if (!user) {
+        throw new NotFoundException('User not found.');
+      }
+
+      if (user.passwordHash) {
+        if (!password) {
+          throw new BadRequestException('Password confirmation is required to delete your account.');
+        }
+        const isValid = await argon2.verify(user.passwordHash, password);
+        if (!isValid) {
+          throw new BadRequestException('Incorrect password. Account deletion unauthorized.');
+        }
+      }
+
+      await this.usersRepository.deactivate(userId);
+
+      await this.auditService.log({
+        action: 'ACCOUNT_DELETED_BY_USER',
+        oldValue: { isActive: true },
+        newValue: { isActive: false },
+        hostelId: hostelId || user.hostelId,
+        userId,
+      });
+
+      return { message: 'Your account has been deleted successfully.' };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) throw error;
+      this.logger.error('Error deleting own account', error instanceof Error ? error.stack : undefined);
+      throw new InternalServerErrorException('Failed to delete account.');
+    }
+  }
 }

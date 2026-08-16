@@ -50,6 +50,14 @@ export class UsersController {
     return this.usersService.findAll(user.hostelId);
   }
 
+  @Delete('me')
+  async deleteOwnAccount(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: { password?: string },
+  ) {
+    return this.usersService.deleteOwnAccount(user.sub, body?.password, user.hostelId);
+  }
+
   @Delete(':id')
   @Roles(Role.WARDEN, Role.SUPER_ADMIN)
   async deactivateUser(

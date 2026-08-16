@@ -91,39 +91,47 @@ export default function WardenActivityHubPage() {
 
   return (
     <div className="relative space-y-8 pb-12">
-      {/* Hero Header */}
-      <PageHero
-        mode="bone"
-        icon={Flame}
-        badges={['Warden Console', 'Activity & Bonus Hub']}
-        title={
-          <span className="inline-flex items-center gap-2 flex-wrap">
-            Warden Activity Hub & Bonus System
-            <Sparkles className="h-7 w-7 text-cornflower-pop animate-pulse" />
-          </span>
-        }
-        description="Verify student task submissions, complete management goals, and convert your credits to real cash bonuses."
-        actions={
-          <>
-            <Link href="/warden/activity-hub/leaderboard">
-              <Button size="sm">
-                <Trophy className="mr-1.5 h-3.5 w-3.5" /> Hostel Leaderboard
-              </Button>
-            </Link>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                fetchDashboard();
-                fetchAvailableTasks();
-                fetchPendingVerifications();
-              }}
+      {/* Hero Banner Card */}
+      <div className="rounded-[28px] bg-[#D7CBFE] p-7 md:p-8 space-y-3 shadow-sm border border-[#B7A6F6] flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="px-3.5 py-1 rounded-full bg-[#3C315B] text-white text-[11px] font-semibold tracking-wide shadow-sm">
+              Warden Console
+            </span>
+            <span className="px-3.5 py-1 rounded-full bg-[#3C315B] text-white text-[11px] font-semibold tracking-wide shadow-sm">
+              Activity &amp; Bonus Hub
+            </span>
+          </div>
+          <h1 className="text-3xl font-bold text-[#3C315B] tracking-tight pt-1 flex items-center gap-2">
+            <Flame className="h-7 w-7 text-[#6A4FE0]" /> Warden Activity Hub &amp; Bonus System
+          </h1>
+          <p className="text-sm text-[#3C315B]/80 max-w-xl leading-relaxed font-medium">
+            Verify student task submissions, complete management goals, and convert your credits to real cash bonuses.
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-3 shrink-0">
+          <Link href="/warden/activity-hub/leaderboard">
+            <button
+              type="button"
+              className="px-4 py-2.5 rounded-full bg-white text-[#3C315B] font-semibold text-sm border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-2 shadow-sm"
             >
-              <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Refresh Desk
-            </Button>
-          </>
-        }
-      />
+              <Trophy className="w-4 h-4 text-[#6A4FE0]" /> Leaderboard
+            </button>
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              fetchDashboard();
+              fetchAvailableTasks();
+              fetchPendingVerifications();
+            }}
+            className="px-5 py-2.5 rounded-full bg-[#3C315B] hover:bg-[#2D2447] text-white text-sm font-bold transition-all shadow-md flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" /> Refresh Desk
+          </button>
+        </div>
+      </div>
 
       {/* Credit Balance & Cash Conversion Summary Banner */}
       <motion.div

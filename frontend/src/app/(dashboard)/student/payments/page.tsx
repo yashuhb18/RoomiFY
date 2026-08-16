@@ -85,7 +85,7 @@ export default function StudentPaymentsPage() {
   return (
     <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
       {/* Hero Banner Card */}
-      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-3 shadow-sm border border-[#E5E4E8]">
+      <div className="rounded-[28px] bg-[#D7CBFE] p-7 md:p-8 space-y-3 shadow-sm border border-[#B7A6F6]">
         <div className="flex items-center gap-2">
           <span className="px-3.5 py-1 rounded-full bg-[#3C315B] text-white text-[11px] font-semibold tracking-wide shadow-sm">
             Secure Razorpay Integration

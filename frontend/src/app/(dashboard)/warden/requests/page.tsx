@@ -116,7 +116,7 @@ export default function WardenRoomRequestsPage() {
   return (
     <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
       {/* Light Purple Hero Banner */}
-      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-3 shadow-sm border border-[#E5E4E8] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="rounded-[28px] bg-[#D7CBFE] p-7 md:p-8 space-y-3 shadow-sm border border-[#B7A6F6] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="px-3 py-0.5 rounded-full bg-[#3C315B] text-white font-bold text-[10px]">Warden Authority</span>

@@ -1,5 +1,6 @@
 'use client';
 
+// RoomiFY Login Page Component
 import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -59,6 +60,7 @@ function LoginFormContent() {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotOtp, setForgotOtp] = useState('');
   const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
   const [isForgotSubmitting, setIsForgotSubmitting] = useState(false);
 
   // Default values empty so user can freely enter email & password
@@ -434,6 +436,10 @@ function LoginFormContent() {
                   toast.error('Password must be at least 12 characters.');
                   return;
                 }
+                if (forgotNewPassword !== forgotConfirmPassword) {
+                  toast.error('New password and confirm password do not match.');
+                  return;
+                }
                 setIsForgotSubmitting(true);
                 try {
                   const res = await api.post('/auth/reset-password-with-otp', {
@@ -447,6 +453,7 @@ function LoginFormContent() {
                   setForgotEmail('');
                   setForgotOtp('');
                   setForgotNewPassword('');
+                  setForgotConfirmPassword('');
                 } catch (err: any) {
                   toast.error(err.response?.data?.message || 'Failed to reset password. Please check your verification code.');
                 } finally {
@@ -483,7 +490,42 @@ function LoginFormContent() {
                 </div>
               </div>
 
-              <Button type="submit" disabled={isForgotSubmitting || forgotNewPassword.length < 12} className="w-full bg-[#3C315B] hover:bg-[#2D2447] text-white">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#3C315B]">Confirm New Password</label>
+                <input
+                  type="password"
+                  placeholder="Password123!@#"
+                  value={forgotConfirmPassword}
+                  onChange={(e) => setForgotConfirmPassword(e.target.value)}
+                  required
+                  className="w-full h-11 px-4 rounded-xl border border-[#E5E4E8] bg-white text-[#3C315B]"
+                />
+                {forgotConfirmPassword.length > 0 && (
+                  <div className={`text-xs font-semibold flex items-center gap-1.5 pt-1 ${
+                    forgotNewPassword === forgotConfirmPassword ? 'text-emerald-600' : 'text-red-500'
+                  }`}>
+                    {forgotNewPassword === forgotConfirmPassword ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" /> Passwords match
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-2 h-2 rounded-full bg-red-500" /> Passwords do not match
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                disabled={
+                  isForgotSubmitting ||
+                  forgotNewPassword.length < 12 ||
+                  forgotNewPassword !== forgotConfirmPassword
+                }
+                className="w-full bg-[#3C315B] hover:bg-[#2D2447] text-white disabled:opacity-50"
+              >
                 {isForgotSubmitting ? 'Resetting Password...' : 'Reset Password & Sign In'}
               </Button>
             </form>

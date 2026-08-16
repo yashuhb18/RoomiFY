@@ -132,7 +132,7 @@ export default function WardenMessageDeskPage() {
   return (
     <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
       {/* Light Purple Hero Banner */}
-      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-4 shadow-sm border border-[#E5E4E8]">
+      <div className="rounded-[28px] bg-[#D7CBFE] p-7 md:p-8 space-y-4 shadow-sm border border-[#B7A6F6]">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
             <span className="inline-block px-3 py-1 rounded-full bg-[#EDEAFD] text-[#3C315B] text-[11px] font-semibold tracking-wide">

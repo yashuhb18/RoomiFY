@@ -97,23 +97,23 @@ export default function WardenDashboardPage() {
   return (
     <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
       {/* Light Purple Hero Banner Card */}
-      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-4 shadow-sm border border-[#E5E4E8]">
+      <div className="rounded-[28px] bg-[#D7CBFE] p-7 md:p-8 space-y-4 shadow-sm border border-[#B7A6F6]">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="inline-block px-3 py-1 rounded-full bg-[#EDEAFD] text-[#3C315B] text-[11px] font-semibold tracking-wide">
+              <span className="inline-block px-3.5 py-1 rounded-full bg-[#EDEAFD] text-[#3C315B] text-xs font-semibold tracking-wide">
                 Control Room Engine
               </span>
-              <span className="inline-block px-3 py-1 rounded-full bg-[#E6F9F0] text-[#2EC08B] text-[11px] font-semibold tracking-wide">
+              <span className="inline-block px-3.5 py-1 rounded-full bg-[#E6F9F0] text-[#2EC08B] text-xs font-semibold tracking-wide">
                 RLS Policy Active
               </span>
             </div>
 
-            <h1 className="text-3xl font-bold text-[#3C315B] tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-[#3C315B] tracking-tight">
               Warden Admin Console
             </h1>
 
-            <p className="text-xs text-[#3C315B]/70 max-w-xl font-normal">
+            <p className="text-sm text-[#3C315B]/80 max-w-xl font-medium">
               3D floorplan heatmap analytics, SLA predictive maintenance, and audit controls.
             </p>
           </div>
@@ -122,16 +122,16 @@ export default function WardenDashboardPage() {
             <button
               type="button"
               onClick={() => refetchOccupancy()}
-              className="px-4 py-2 rounded-full bg-white text-[#3C315B] font-semibold text-xs border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-2 shadow-sm"
+              className="px-4 py-2.5 rounded-full bg-white text-[#3C315B] font-semibold text-sm border border-[#E5E4E8] hover:bg-[#FAFAFA] transition-all flex items-center gap-2 shadow-sm"
             >
-              <RefreshCw className="w-3.5 h-3.5" /> Refresh Grid
+              <RefreshCw className="w-4 h-4" /> Refresh Grid
             </button>
             <button
               type="button"
               onClick={() => setIsRoomModalOpen(true)}
-              className="px-5 py-2 rounded-full bg-[#9884F9] hover:bg-[#8570F8] text-white font-semibold text-xs transition-all flex items-center gap-2 shadow-sm"
+              className="px-5 py-2.5 rounded-full bg-[#9884F9] hover:bg-[#8570F8] text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-sm"
             >
-              <Plus className="w-3.5 h-3.5" /> Add Room
+              <Plus className="w-4 h-4" /> Add Room
             </button>
           </div>
         </div>
@@ -142,11 +142,11 @@ export default function WardenDashboardPage() {
         {/* Occupancy Rate */}
         <div className="rounded-2xl bg-white p-5 border border-[#E5E4E8] flex items-center justify-between shadow-sm">
           <div className="space-y-1">
-            <p className="text-[11px] font-semibold text-[#3C315B]/50 uppercase tracking-wider">
+            <p className="text-xs font-bold text-[#3C315B]/60 uppercase tracking-wider">
               OCCUPANCY RATE
             </p>
-            <p className="text-2xl font-bold text-[#3C315B]">{occupancyRate}%</p>
-            <p className="text-xs text-[#3C315B]/60 font-medium">
+            <p className="text-3xl font-bold text-[#3C315B]">{occupancyRate}%</p>
+            <p className="text-xs md:text-sm text-[#3C315B]/70 font-medium">
               {totalOccupied} / {totalBeds} Beds Booked
             </p>
           </div>
@@ -158,11 +158,11 @@ export default function WardenDashboardPage() {
         {/* Total Rooms */}
         <div className="rounded-2xl bg-white p-5 border border-[#E5E4E8] flex items-center justify-between shadow-sm">
           <div className="space-y-1">
-            <p className="text-[11px] font-semibold text-[#3C315B]/50 uppercase tracking-wider">
+            <p className="text-xs font-bold text-[#3C315B]/60 uppercase tracking-wider">
               TOTAL ROOMS
             </p>
-            <p className="text-2xl font-bold text-[#3C315B]">{totalRooms}</p>
-            <p className="text-xs text-[#3C315B]/60 font-medium">Capacity Matrix</p>
+            <p className="text-3xl font-bold text-[#3C315B]">{totalRooms}</p>
+            <p className="text-xs md:text-sm text-[#3C315B]/70 font-medium">Capacity Matrix</p>
           </div>
           <div className="w-11 h-11 rounded-full bg-[#EDEAFD] text-[#6A4FE0] flex items-center justify-center">
             <Building2 className="w-5 h-5" />
@@ -172,13 +172,13 @@ export default function WardenDashboardPage() {
         {/* SLA Health */}
         <div className="rounded-2xl bg-white p-5 border border-[#E5E4E8] flex items-center justify-between shadow-sm">
           <div className="space-y-1">
-            <p className="text-[11px] font-semibold text-[#3C315B]/50 uppercase tracking-wider">
+            <p className="text-xs font-bold text-[#3C315B]/60 uppercase tracking-wider">
               SLA HEALTH
             </p>
-            <p className="text-2xl font-bold text-[#2EC08B]">
+            <p className="text-3xl font-bold text-[#2EC08B]">
               {breachRisks && breachRisks.length > 0 ? 'Warning' : '100%'}
             </p>
-            <p className="text-xs text-[#3C315B]/60 font-medium">Predictive Engine</p>
+            <p className="text-xs md:text-sm text-[#3C315B]/70 font-medium">Predictive Engine</p>
           </div>
           <div className="w-11 h-11 rounded-full bg-[#E6F9F0] text-[#2EC08B] flex items-center justify-center">
             <CheckCircle2 className="w-5 h-5" />
@@ -188,13 +188,13 @@ export default function WardenDashboardPage() {
         {/* Breach Risks */}
         <div className="rounded-2xl bg-white p-5 border border-[#E5E4E8] flex items-center justify-between shadow-sm">
           <div className="space-y-1">
-            <p className="text-[11px] font-semibold text-[#3C315B]/50 uppercase tracking-wider">
+            <p className="text-xs font-bold text-[#3C315B]/60 uppercase tracking-wider">
               BREACH RISKS
             </p>
-            <p className="text-2xl font-bold text-red-500">
+            <p className="text-3xl font-bold text-red-500">
               {breachRisks ? breachRisks.length : 0}
             </p>
-            <p className="text-xs text-[#3C315B]/60 font-medium">Predicted Overruns</p>
+            <p className="text-xs md:text-sm text-[#3C315B]/70 font-medium">Predicted Overruns</p>
           </div>
           <div className="w-11 h-11 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
             <AlertTriangle className="w-5 h-5" />

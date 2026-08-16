@@ -91,12 +91,6 @@ const navItems: NavItem[] = [
     icon: User,
     roles: ['WARDEN', 'SUPER_ADMIN'],
   },
-  {
-    title: '2FA Security',
-    href: '/warden/mfa-setup',
-    icon: KeyRound,
-    roles: ['WARDEN', 'SUPER_ADMIN'],
-  },
 
   // Student Nav Items (10 Core Features including Messages!)
   {
@@ -171,12 +165,12 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="w-56 shrink-0 bg-[#EDEAFD] hidden md:flex flex-col min-h-[calc(100vh-4rem)] p-4 justify-between border-r border-[#E5E4E8]/60">
+    <aside className="w-60 shrink-0 bg-[#EFEBFD] hidden md:flex flex-col min-h-[calc(100vh-4rem)] p-4 justify-between border-r-2 border-[#B8A7F6] shadow-sm">
       <div>
-        <div className="px-4 text-[10px] font-bold text-[#3C315B]/50 tracking-wider mb-2 uppercase">
+        <div className="px-4 text-xs font-bold text-[#3C315B]/70 tracking-widest mb-3 uppercase">
           MENU
         </div>
-        <nav className="space-y-1">
+        <nav className="space-y-1.5">
           {filteredItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -186,16 +180,16 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 px-4 py-2.5 rounded-full text-xs font-semibold transition-all',
+                  'flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold transition-all',
                   isActive
-                    ? 'bg-[#ECE8FE] text-[#3C315B] shadow-sm'
-                    : 'text-[#3C315B]/70 hover:bg-white/60 hover:text-[#3C315B]',
+                    ? 'bg-[#D7CBFE] text-[#3C315B] font-bold border border-[#B7A6F6] shadow-sm'
+                    : 'text-[#3C315B]/80 hover:bg-white hover:text-[#3C315B]',
                 )}
               >
                 <Icon
                   className={cn(
-                    'h-4 w-4',
-                    isActive ? 'text-[#6A4FE0]' : 'text-[#3C315B]/50',
+                    'h-5 w-5 shrink-0',
+                    isActive ? 'text-[#6A4FE0]' : 'text-[#3C315B]/60',
                   )}
                 />
                 <span>{item.title}</span>
@@ -207,10 +201,10 @@ export function Sidebar() {
 
       {/* RLS Security Footer Card */}
       <div className="p-4 rounded-2xl bg-white border border-[#E5E4E8] space-y-1 text-xs shadow-sm mt-4">
-        <div className="flex items-center gap-1.5 text-emerald-600 font-semibold text-[11px]">
-          <CheckCircle2 className="h-3.5 w-3.5" /> RLS Active
+        <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs">
+          <CheckCircle2 className="h-4 w-4" /> RLS Active
         </div>
-        <p className="text-[11px] text-[#3C315B]/60 leading-relaxed font-normal">
+        <p className="text-xs text-[#3C315B]/70 leading-relaxed font-normal">
           Tenant-isolated PostgreSQL session.
         </p>
       </div>

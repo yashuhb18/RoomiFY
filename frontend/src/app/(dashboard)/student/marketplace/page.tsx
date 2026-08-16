@@ -142,7 +142,7 @@ export default function StudentMarketplacePage() {
   return (
     <div className="space-y-6 pb-12 bg-[#EDEAFD] min-h-screen">
       {/* Hero Banner Card */}
-      <div className="rounded-[28px] bg-[#ECE8FE] p-7 md:p-8 space-y-3 shadow-sm border border-[#E5E4E8] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="rounded-[28px] bg-[#D7CBFE] p-7 md:p-8 space-y-3 shadow-sm border border-[#B7A6F6] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2">
           <span className="px-3.5 py-1 rounded-full bg-[#3C315B] text-white text-[11px] font-semibold tracking-wide shadow-sm inline-block">
             Peer-to-Peer Hostel Commerce
