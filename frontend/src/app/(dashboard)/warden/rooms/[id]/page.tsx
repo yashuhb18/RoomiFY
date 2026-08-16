@@ -163,21 +163,33 @@ export default function WardenRoomDetailPage() {
 
             {/* Gallery Grid */}
             {room.images && room.images.length > 0 ? (
-              <div className="grid grid-cols-3 gap-4">
-                {room.images.map((img: any) => (
-                  <div key={img.id} className="relative group h-36 rounded-card overflow-hidden border border-ash bg-bone">
-                    <img src={img.secureUrl} alt="Room" className="w-full h-full object-cover" />
-                    <button
-                      onClick={() => deletePhotoMutation.mutate(img.id)}
-                      className="absolute top-2 right-2 p-1.5 rounded-full bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ))}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {room.images.map((img: any) => {
+                  const srcUrl = img.secureUrl || img.url || 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80';
+                  return (
+                    <div key={img.id} className="relative group h-40 rounded-2xl overflow-hidden border border-[#E5E4E8] bg-[#FAFAFA] shadow-sm">
+                      <img
+                        src={srcUrl}
+                        alt="Room Photograph"
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        onError={(e: any) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80';
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => deletePhotoMutation.mutate(img.id)}
+                        className="absolute top-2 right-2 p-2 rounded-full bg-red-600/90 hover:bg-red-700 text-white opacity-0 group-hover:opacity-100 transition-all shadow-md"
+                        title="Delete photograph"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
-              <p className="text-caption text-fog text-center py-6">No official room photos uploaded yet.</p>
+              <p className="text-xs text-[#3C315B]/60 text-center py-6 font-medium">No official room photos uploaded yet.</p>
             )}
           </Card>
 

@@ -88,8 +88,10 @@ function LoginFormContent() {
         const loggedInUser = useAuthStore.getState().user;
         let target = redirectPath;
 
-        if (redirectPath === '/student' || !redirectPath) {
-          if (loggedInUser?.role === 'WARDEN' || loggedInUser?.role === 'SUPER_ADMIN') {
+        if (redirectPath === '/student' || redirectPath === '/warden' || !redirectPath) {
+          if (loggedInUser?.role === 'SUPER_ADMIN') {
+            target = '/command-center';
+          } else if (loggedInUser?.role === 'WARDEN') {
             target = '/warden';
           } else {
             target = '/student';
@@ -118,7 +120,13 @@ function LoginFormContent() {
       const loggedInUser = useAuthStore.getState().user;
       let target = redirectPath;
       if (!target || target === '/login') {
-        target = loggedInUser?.role === 'WARDEN' || loggedInUser?.role === 'SUPER_ADMIN' ? '/warden' : '/student';
+        if (loggedInUser?.role === 'SUPER_ADMIN') {
+          target = '/command-center';
+        } else if (loggedInUser?.role === 'WARDEN') {
+          target = '/warden';
+        } else {
+          target = '/student';
+        }
       }
       router.push(target);
     } catch (err: any) {
