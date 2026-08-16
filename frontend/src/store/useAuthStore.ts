@@ -21,6 +21,9 @@ interface AuthState {
   login: (email: string, password: string) => Promise<{
     requiresMfa: boolean;
     mfaToken?: string;
+    requiresPasskey?: boolean;
+    pendingUserId?: string;
+    userRole?: string;
   }>;
 
   validateMfa: (mfaToken: string, otpToken: string) => Promise<void>;
@@ -54,6 +57,16 @@ export const useAuthStore = create<AuthState>()(
             return { requiresMfa: true, mfaToken: data.mfaToken };
           }
 
+          if (data.requiresPasskey) {
+            set({ isLoading: false });
+            return {
+              requiresMfa: false,
+              requiresPasskey: true,
+              pendingUserId: data.pendingUserId,
+              userRole: data.userRole,
+            };
+          }
+
           set({
             user: data.user,
             accessToken: data.accessToken,
@@ -61,7 +74,7 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
 
-          return { requiresMfa: false };
+          return { requiresMfa: false, requiresPasskey: false };
         } catch (error) {
           set({ isLoading: false });
           throw error;

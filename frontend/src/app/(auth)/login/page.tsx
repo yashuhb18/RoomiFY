@@ -23,6 +23,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import api from '@/lib/axios';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/common/logo';
+import { PasskeyPromptModal } from '@/components/auth/PasskeyPromptModal';
+import { EmojiCipherGrid } from '@/components/auth/EmojiCipherGrid';
 
 import {
   Dialog,
@@ -55,6 +57,16 @@ function LoginFormContent() {
   const [otpCode, setOtpCode] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const [passkeyState, setPasskeyState] = useState<{ open: boolean; userId: string; userRole: string }>({
+    open: false,
+    userId: '',
+    userRole: '',
+  });
+  const [emojiCipherState, setEmojiCipherState] = useState<{ open: boolean; userId: string }>({
+    open: false,
+    userId: '',
+  });
+
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState<1 | 2>(1);
   const [forgotEmail, setForgotEmail] = useState('');
@@ -63,7 +75,6 @@ function LoginFormContent() {
   const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
   const [isForgotSubmitting, setIsForgotSubmitting] = useState(false);
 
-  // Default values empty so user can freely enter email & password
   const {
     register,
     handleSubmit,
@@ -77,6 +88,20 @@ function LoginFormContent() {
     },
   });
 
+  const handleFinalRedirect = (role?: string) => {
+    let target = redirectPath || '/student';
+    if (redirectPath === '/student' || redirectPath === '/warden' || !redirectPath) {
+      if (role === 'SUPER_ADMIN') {
+        target = '/command-center';
+      } else if (role === 'WARDEN') {
+        target = '/warden';
+      } else {
+        target = '/student';
+      }
+    }
+    router.push(target);
+  };
+
   const onSubmit = async (values: LoginFormValues) => {
     setErrorMsg(null);
     try {
@@ -84,21 +109,15 @@ function LoginFormContent() {
 
       if (result.requiresMfa && result.mfaToken) {
         setMfaState({ required: true, token: result.mfaToken });
+      } else if (result.requiresPasskey && result.pendingUserId) {
+        setPasskeyState({
+          open: true,
+          userId: result.pendingUserId,
+          userRole: result.userRole || '',
+        });
       } else {
         const loggedInUser = useAuthStore.getState().user;
-        let target = redirectPath;
-
-        if (redirectPath === '/student' || redirectPath === '/warden' || !redirectPath) {
-          if (loggedInUser?.role === 'SUPER_ADMIN') {
-            target = '/command-center';
-          } else if (loggedInUser?.role === 'WARDEN') {
-            target = '/warden';
-          } else {
-            target = '/student';
-          }
-        }
-
-        router.push(target);
+        handleFinalRedirect(loggedInUser?.role);
       }
     } catch (err: any) {
       if (!err.response) {
@@ -540,6 +559,31 @@ function LoginFormContent() {
           )}
         </DialogContent>
       </Dialog>
+
+      <PasskeyPromptModal
+        isOpen={passkeyState.open}
+        userId={passkeyState.userId}
+        userRole={passkeyState.userRole}
+        onSuccess={(res) => {
+          setPasskeyState({ open: false, userId: '', userRole: '' });
+          if (res.requiresEmojiCipher) {
+            setEmojiCipherState({ open: true, userId: passkeyState.userId });
+          } else {
+            handleFinalRedirect(passkeyState.userRole);
+          }
+        }}
+        onCancel={() => setPasskeyState({ open: false, userId: '', userRole: '' })}
+      />
+
+      <EmojiCipherGrid
+        isOpen={emojiCipherState.open}
+        userId={emojiCipherState.userId}
+        onSuccess={() => {
+          setEmojiCipherState({ open: false, userId: '' });
+          handleFinalRedirect('SUPER_ADMIN');
+        }}
+        onCancel={() => setEmojiCipherState({ open: false, userId: '' })}
+      />
 
       <div className="h-16" />
     </div>

@@ -21,6 +21,8 @@ import {
 import { useAuthStore } from '@/store/useAuthStore';
 import { Input } from '@/components/ui/input';
 import { Logo } from '@/components/common/logo';
+import { PasskeyPromptModal } from '@/components/auth/PasskeyPromptModal';
+import { EmojiCipherGrid } from '@/components/auth/EmojiCipherGrid';
 import { toast } from 'sonner';
 
 const wardenLoginSchema = z.object({
@@ -42,12 +44,26 @@ function WardenLoginContent() {
   });
   const [otpCode, setOtpCode] = useState('');
 
+  const [passkeyState, setPasskeyState] = useState<{ open: boolean; userId: string; userRole: string }>({
+    open: false,
+    userId: '',
+    userRole: '',
+  });
+  const [emojiCipherState, setEmojiCipherState] = useState<{ open: boolean; userId: string }>({
+    open: false,
+    userId: '',
+  });
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<WardenLoginForm>({
     resolver: zodResolver(wardenLoginSchema),
+    defaultValues: {
+      email: 'warden@aegis.hostel',
+      password: 'Warden123!',
+    },
   });
 
   const onSubmit = async (data: WardenLoginForm) => {
@@ -62,10 +78,20 @@ function WardenLoginContent() {
         return;
       }
 
+      if (result?.requiresPasskey && result?.pendingUserId) {
+        setPasskeyState({
+          open: true,
+          userId: result.pendingUserId,
+          userRole: result.userRole || 'WARDEN',
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const loggedInUser = useAuthStore.getState().user;
       if (loggedInUser?.role === 'WARDEN' || loggedInUser?.role === 'SUPER_ADMIN') {
         toast.success('Welcome to Warden Management Portal!');
-        router.push('/warden');
+        router.push(loggedInUser.role === 'SUPER_ADMIN' ? '/command-center' : '/warden');
       } else {
         setErrorMsg('Access denied. This portal is for Hostel Wardens only.');
         useAuthStore.setState({ accessToken: null, user: null, isAuthenticated: false });
@@ -240,6 +266,34 @@ function WardenLoginContent() {
           </div>
         </motion.div>
       </main>
+
+      {/* Security Modals for Layer 2 & 3 */}
+      <PasskeyPromptModal
+        isOpen={passkeyState.open}
+        userId={passkeyState.userId}
+        userRole={passkeyState.userRole}
+        onSuccess={(res) => {
+          setPasskeyState({ open: false, userId: '', userRole: '' });
+          if (res.requiresEmojiCipher) {
+            setEmojiCipherState({ open: true, userId: passkeyState.userId });
+          } else {
+            toast.success('Passkey Biometric Verified — Welcome Warden!');
+            router.push(passkeyState.userRole === 'SUPER_ADMIN' ? '/command-center' : '/warden');
+          }
+        }}
+        onCancel={() => setPasskeyState({ open: false, userId: '', userRole: '' })}
+      />
+
+      <EmojiCipherGrid
+        isOpen={emojiCipherState.open}
+        userId={emojiCipherState.userId}
+        onSuccess={() => {
+          setEmojiCipherState({ open: false, userId: '' });
+          toast.success('SuperAdmin Emoji Cipher Solved — Access Granted!');
+          router.push('/command-center');
+        }}
+        onCancel={() => setEmojiCipherState({ open: false, userId: '' })}
+      />
 
       {/* Footer */}
       <footer className="relative z-10 p-6 text-center text-xs text-white/20 font-mono">

@@ -31,6 +31,7 @@ import {
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { PasswordStrengthMeter } from '@/components/common/PasswordStrengthMeter';
+import { EmojiCipherSetup } from '@/components/auth/EmojiCipherSetup';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -461,6 +462,11 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
+
+      {/* WARDEN & SUPER ADMIN ONLY: One in a Million Auth System Setup (Passkey & Emoji Cipher) */}
+      {(!isStudent || user?.role === 'WARDEN' || user?.role === 'SUPER_ADMIN') && (
+        <EmojiCipherSetup />
+      )}
 
       {/* MFA Security Quick Settings (Students Only) */}
       {isStudent && (

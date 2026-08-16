@@ -31,7 +31,7 @@ const loadRazorpayScript = () => {
   });
 };
 
-export default function StudentMarketplacePage() {
+function StudentMarketplaceContent() {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const isSuccess = searchParams.get('success') === 'true';
@@ -301,5 +301,13 @@ export default function StudentMarketplacePage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function StudentMarketplacePage() {
+  return (
+    <React.Suspense fallback={<div className="p-8 text-center text-xs text-[#3C315B]/50 font-mono">Loading marketplace...</div>}>
+      <StudentMarketplaceContent />
+    </React.Suspense>
   );
 }

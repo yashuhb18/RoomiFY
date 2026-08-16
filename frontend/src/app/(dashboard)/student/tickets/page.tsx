@@ -16,6 +16,16 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
+// Helper function to resolve backend upload URLs correctly
+const getMediaUrl = (url: string | null | undefined): string | null => {
+  if (!url || url === 'null' || url === 'undefined') return null;
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    return url;
+  }
+  const cleanPath = url.startsWith('/') ? url : `/${url}`;
+  return `http://localhost:5000${cleanPath}`;
+};
+
 export default function StudentTicketsPage() {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
@@ -124,12 +134,12 @@ export default function StudentTicketsPage() {
                 </div>
               </div>
 
-              {ticket.photoUrl && (
+              {getMediaUrl(ticket.photoUrl || ticket.attachmentUrl || ticket.photo) && (
                 <a
-                  href={ticket.photoUrl}
+                  href={getMediaUrl(ticket.photoUrl || ticket.attachmentUrl || ticket.photo)!}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3 py-1.5 rounded-xl bg-[#ECE8FE] text-[#6A4FE0] text-xs font-bold hover:bg-[#D6CDFE] transition-colors shrink-0"
+                  className="px-3.5 py-2 rounded-xl bg-[#ECE8FE] text-[#6A4FE0] text-xs font-bold hover:bg-[#D6CDFE] transition-colors shrink-0 flex items-center gap-1.5"
                 >
                   View Photo Attachment
                 </a>

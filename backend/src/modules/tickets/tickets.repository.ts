@@ -27,8 +27,8 @@ export class TicketsRepository {
     return this.prisma.ticket.findUnique({
       where: { id },
       include: {
-        student: { select: { id: true, email: true } },
-        assignedStaff: { select: { id: true, email: true } },
+        student: { select: { id: true, email: true, profile: true } },
+        assignedStaff: { select: { id: true, email: true, profile: true } },
       },
     });
   }
@@ -37,8 +37,8 @@ export class TicketsRepository {
     return this.prisma.ticket.findMany({
       where: { hostelId },
       include: {
-        student: { select: { id: true, email: true } },
-        assignedStaff: { select: { id: true, email: true } },
+        student: { select: { id: true, email: true, profile: true } },
+        assignedStaff: { select: { id: true, email: true, profile: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -59,8 +59,8 @@ export class TicketsRepository {
         status: { not: TicketStatus.RESOLVED },
       },
       include: {
-        student: { select: { id: true, email: true } },
-        assignedStaff: { select: { id: true, email: true } },
+        student: { select: { id: true, email: true, profile: true } },
+        assignedStaff: { select: { id: true, email: true, profile: true } },
       },
       orderBy: { slaDeadline: 'asc' },
     });
