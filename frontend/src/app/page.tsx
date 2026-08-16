@@ -4,7 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useAuthStore } from '@/store/useAuthStore';
 import { Logo } from '@/components/common/logo';
 import { PhantomWaveCanvas } from '@/components/landing/phantom-wave-canvas';
 import { HeroVisualStack } from '@/components/landing/hero-visual';
@@ -14,7 +13,6 @@ import { ShieldCheck, ArrowRight } from 'lucide-react';
 
 export default function RootHomePage() {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
 
   return (
     <div className="min-h-screen bg-[#EDEAFD] text-[#3C315B] flex flex-col justify-between p-4 md:p-6 lg:p-8 space-y-6">
@@ -23,13 +21,19 @@ export default function RootHomePage() {
         {/* Left: Logo */}
         <Logo size="md" href="/" />
 
-        {/* Center Nav Links */}
-        <div className="hidden md:flex items-center gap-6 bg-white border border-[#E5E4E8] rounded-full px-6 py-2 shadow-sm text-xs font-semibold text-[#3C315B]/80">
+        {/* Center Nav Links (5 Features with Bigger Fonts) */}
+        <div className="hidden lg:flex items-center gap-7 bg-white border border-[#E5E4E8] rounded-full px-7 py-2.5 shadow-md text-sm font-extrabold text-[#3C315B]">
           <a href="#matching" className="hover:text-[#6A4FE0] transition-colors">
             Roommate Match
           </a>
+          <a href="#allocation" className="hover:text-[#6A4FE0] transition-colors">
+            Room Allocation
+          </a>
           <a href="#marketplace" className="hover:text-[#6A4FE0] transition-colors">
             Marketplace
+          </a>
+          <a href="#maintenance" className="hover:text-[#6A4FE0] transition-colors">
+            Maintenance SLA
           </a>
           <a href="#security" className="hover:text-[#6A4FE0] transition-colors">
             Zero-Trust Security
@@ -37,31 +41,20 @@ export default function RootHomePage() {
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-4 text-xs font-semibold">
-          {isAuthenticated ? (
-            <Link
-              href={user?.role === 'WARDEN' || user?.role === 'SUPER_ADMIN' ? '/warden' : '/student'}
-              className="px-5 py-2.5 rounded-full bg-[#3C315B] hover:bg-[#2D2447] text-white font-bold transition-all shadow-sm flex items-center gap-1.5"
-            >
-              Go to Student Portal <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="text-[#3C315B]/80 hover:text-[#3C315B] transition-colors"
-              >
-                Log in
-              </Link>
-              <button
-                type="button"
-                onClick={() => router.push('/login')}
-                className="bg-[#AB9FF2] hover:bg-[#9688EE] text-white px-5 py-2.5 rounded-full transition-all shadow-sm font-semibold"
-              >
-                Get Started
-              </button>
-            </>
-          )}
+        <div className="flex items-center gap-5 text-sm font-extrabold">
+          <Link
+            href="/login"
+            className="text-[#3C315B] hover:text-[#6A4FE0] transition-colors"
+          >
+            Log in
+          </Link>
+          <button
+            type="button"
+            onClick={() => router.push('/register')}
+            className="bg-[#6A4FE0] hover:bg-[#583EC2] text-white px-6 py-2.5 rounded-full transition-all shadow-md font-extrabold text-sm"
+          >
+            Get Started
+          </button>
         </div>
       </header>
 
@@ -92,10 +85,10 @@ export default function RootHomePage() {
             <div className="pt-2 pb-6">
               <button
                 type="button"
-                onClick={() => router.push(isAuthenticated ? (user?.role === 'WARDEN' || user?.role === 'SUPER_ADMIN' ? '/warden' : '/student') : '/login')}
+                onClick={() => router.push('/register')}
                 className="bg-white hover:bg-zinc-100 text-[#0D0B18] font-bold text-sm px-8 py-3.5 rounded-full transition-transform hover:scale-105 shadow-xl inline-flex items-center justify-center gap-2"
               >
-                {isAuthenticated ? 'Open Student Portal' : 'Get Started Free'} <ArrowRight className="w-4 h-4" />
+                Get Started Free <ArrowRight className="w-4 h-4" />
               </button>
             </div>
 
@@ -134,47 +127,67 @@ export default function RootHomePage() {
       </main>
 
       {/* Rich Full-Width Glass Footer Card */}
-      <footer className="w-full max-w-[1400px] mx-auto bg-white/90 backdrop-blur-2xl border border-[#E5E4E8] rounded-[36px] p-8 md:p-10 shadow-xl space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-xs">
-          <div className="space-y-3 md:col-span-1">
+      <footer className="w-full max-w-[1400px] mx-auto bg-white/95 backdrop-blur-2xl border border-[#E5E4E8] rounded-[36px] p-8 md:p-12 shadow-xl space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-sm">
+          {/* Brand Info */}
+          <div className="space-y-4 md:col-span-1">
             <Logo size="md" href="/" />
-            <p className="text-[#3C315B]/70 leading-relaxed font-normal">
+            <p className="text-[#3C315B]/70 leading-relaxed font-normal text-xs md:text-sm">
               Next-generation zero-trust hostel management platform. Built with Next.js, NestJS, and PostgreSQL.
             </p>
           </div>
 
-          <div className="space-y-2">
-            <h4 className="font-extrabold text-[#3C315B] uppercase tracking-wider text-[11px]">Student Features</h4>
-            <ul className="space-y-2 text-[#3C315B]/70 font-medium">
-              <li><a href="#matching" className="hover:text-[#6A4FE0] transition-colors">Symbiotic Roommate Matcher</a></li>
-              <li><a href="#marketplace" className="hover:text-[#6A4FE0] transition-colors">Peer-to-Peer Marketplace</a></li>
-              <li><a href="#security" className="hover:text-[#6A4FE0] transition-colors">Passkey &amp; RLS Security</a></li>
+          {/* 5 Student Features Column (Bigger Font Size) */}
+          <div className="space-y-3">
+            <h4 className="font-extrabold text-[#3C315B] uppercase tracking-wider text-xs md:text-sm">
+              Student Features
+            </h4>
+            <ul className="space-y-2.5 text-[#3C315B]/80 font-bold text-xs md:text-sm">
+              <li>
+                <a href="#matching" className="hover:text-[#6A4FE0] transition-colors">
+                  1. Symbiotic Roommate Matcher
+                </a>
+              </li>
+              <li>
+                <a href="#allocation" className="hover:text-[#6A4FE0] transition-colors">
+                  2. Concurrency Allocation Engine
+                </a>
+              </li>
+              <li>
+                <a href="#marketplace" className="hover:text-[#6A4FE0] transition-colors">
+                  3. Peer-to-Peer Marketplace
+                </a>
+              </li>
+              <li>
+                <a href="#maintenance" className="hover:text-[#6A4FE0] transition-colors">
+                  4. SLA Maintenance Tracker
+                </a>
+              </li>
+              <li>
+                <a href="#security" className="hover:text-[#6A4FE0] transition-colors">
+                  5. WebAuthn Passkey Security
+                </a>
+              </li>
             </ul>
           </div>
 
-          <div className="space-y-2">
-            <h4 className="font-extrabold text-[#3C315B] uppercase tracking-wider text-[11px]">Student Portals</h4>
-            <ul className="space-y-2 text-[#3C315B]/70 font-medium">
-              <li><Link href="/student/rooms" className="hover:text-[#6A4FE0] transition-colors">Room Allocation Hub</Link></li>
-              <li><Link href="/student/match" className="hover:text-[#6A4FE0] transition-colors">Roommate Match Rankings</Link></li>
-              <li><Link href="/student/marketplace" className="hover:text-[#6A4FE0] transition-colors">Campus Market</Link></li>
-            </ul>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="font-extrabold text-[#3C315B] uppercase tracking-wider text-[11px]">Security Protocol</h4>
-            <div className="p-3 rounded-2xl bg-[#ECE8FE] border border-[#AB9FF2]/40 space-y-1">
-              <span className="flex items-center gap-1.5 font-bold text-[#3C315B]">
+          {/* Security Protocol Badge */}
+          <div className="space-y-3">
+            <h4 className="font-extrabold text-[#3C315B] uppercase tracking-wider text-xs md:text-sm">
+              Security Protocol
+            </h4>
+            <div className="p-4 rounded-2xl bg-[#ECE8FE] border border-[#AB9FF2]/40 space-y-1.5">
+              <span className="flex items-center gap-2 font-extrabold text-[#3C315B] text-xs md:text-sm">
                 <ShieldCheck className="w-4 h-4 text-[#6A4FE0]" /> PostgreSQL RLS Active
               </span>
-              <p className="text-[10px] text-[#3C315B]/70 font-normal">
+              <p className="text-xs text-[#3C315B]/75 font-medium leading-relaxed">
                 Multi-tenant row level isolation active across database sessions.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-[#E5E4E8] pt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-[#3C315B]/60 gap-3 font-medium">
+        <div className="border-t border-[#E5E4E8] pt-5 flex flex-col sm:flex-row items-center justify-between text-xs md:text-sm text-[#3C315B]/70 gap-4 font-semibold">
           <span>RoomiFY Zero-Trust Student Hostel Platform &copy; 2026</span>
           <div className="flex items-center gap-6">
             <span className="hover:text-[#6A4FE0] cursor-pointer transition-colors">Privacy Policy</span>
