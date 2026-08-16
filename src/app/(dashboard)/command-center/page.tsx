@@ -18,6 +18,9 @@ export default function CommandHubOverview() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [chartTab, setChartTab] = useState<'activity' | 'revenue'>('activity');
+  const [isLockdownActive, setIsLockdownActive] = useState(false);
+  const [masterKey, setMasterKey] = useState('');
+  const [isTogglingLockdown, setIsTogglingLockdown] = useState(false);
 
   const fetchMetrics = async () => {
     setLoading(true);
@@ -35,8 +38,37 @@ export default function CommandHubOverview() {
     }
   };
 
+  const fetchLockdownStatus = async () => {
+    try {
+      const res = await api.get('/auth/lockdown-status');
+      setIsLockdownActive(!!res.data.lockdownActive);
+    } catch (err) {}
+  };
+
+  const handleToggleLockdown = async () => {
+    if (!masterKey) {
+      toast.error('Master Security Passcode required');
+      return;
+    }
+    setIsTogglingLockdown(true);
+    try {
+      const res = await api.post('/auth/lockdown', {
+        isLockdown: !isLockdownActive,
+        masterKey,
+      });
+      setIsLockdownActive(res.data.lockdownActive);
+      toast.success(res.data.message);
+      setMasterKey('');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Lockdown override failed');
+    } finally {
+      setIsTogglingLockdown(false);
+    }
+  };
+
   useEffect(() => {
     fetchMetrics();
+    fetchLockdownStatus();
   }, []);
 
   const s = data?.summary;
@@ -92,12 +124,12 @@ export default function CommandHubOverview() {
   const DONUT_COLORS = ['#6A4FE0', '#AB9FF2', '#3C315B', '#F59E0B'];
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto w-full font-sans">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[#0F172A] tracking-tight">Dashboard Overview</h2>
-          <p className="text-xs text-[#64748B] mt-1">Real-time platform metrics from your PostgreSQL database</p>
+          <h2 className="text-2xl font-bold text-[#0F172A] tracking-tight">Executive Command Hub</h2>
+          <p className="text-xs text-[#64748B] mt-1">Real-time platform telemetry &amp; Ultra Super Level Security Control</p>
         </div>
         <button
           onClick={fetchMetrics}
@@ -107,6 +139,65 @@ export default function CommandHubOverview() {
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           Refresh
         </button>
+      </div>
+
+      {/* Ultra Super Level Security: Emergency System Lockdown Card */}
+      <div className={`p-6 rounded-3xl border transition-all shadow-md space-y-4 ${
+        isLockdownActive
+          ? 'bg-red-950/90 border-red-500 text-white animate-pulse'
+          : 'bg-[#120D26] border-amber-500/30 text-white'
+      }`}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 font-mono text-[10px] font-bold uppercase tracking-wider">
+                Ultra Super Level Security Protocol
+              </span>
+              <span className={`px-3 py-0.5 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider ${
+                isLockdownActive ? 'bg-red-500 text-white' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+              }`}>
+                {isLockdownActive ? '🚨 EMERGENCY LOCKDOWN ACTIVE' : '✅ SYSTEM OPERATIONAL'}
+              </span>
+            </div>
+            <h3 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 pt-1">
+              <AlertTriangle className="w-5 h-5 text-amber-400" /> Platform Master Lockdown Override
+            </h3>
+            <p className="text-xs text-white/60">
+              Instantly suspend non-administrative operations across AEGIS infrastructure during security emergencies.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 bg-[#1C1538] p-3 rounded-2xl border border-[#2E2452] shrink-0">
+            <div className="space-y-1">
+              <label className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider block">
+                Master Security Key
+              </label>
+              <input
+                type="password"
+                placeholder="Passcode 123456"
+                value={masterKey}
+                onChange={(e) => setMasterKey(e.target.value)}
+                className="h-9 px-3 rounded-xl bg-[#120D26] border border-[#2E2452] text-xs text-white focus:outline-none focus:border-amber-400 font-mono"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleToggleLockdown}
+              disabled={isTogglingLockdown || !masterKey}
+              className={`h-9 px-5 rounded-xl font-mono text-xs font-extrabold transition-all shadow-md self-end disabled:opacity-50 ${
+                isLockdownActive
+                  ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                  : 'bg-red-600 hover:bg-red-700 text-white'
+              }`}
+            >
+              {isTogglingLockdown
+                ? 'Processing...'
+                : isLockdownActive
+                ? 'Deactivate Lockdown'
+                : 'Activate Emergency Lockdown'}
+            </button>
+          </div>
+        </div>
       </div>
 
       {loading && !data ? (

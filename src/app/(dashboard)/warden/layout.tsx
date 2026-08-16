@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Navbar } from '@/components/common/Navbar';
 import { Sidebar } from '@/components/common/Sidebar';
+import { useSessionLock } from '@/hooks/useSessionLock';
+import { SessionLockModal } from '@/components/common/SessionLockModal';
 
 export default function WardenLayout({
   children,
@@ -13,15 +15,19 @@ export default function WardenLayout({
 }) {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
+  const { isLocked, unlockSession } = useSessionLock();
 
   useEffect(() => {
-    if (isAuthenticated && user?.role === 'STUDENT') {
+    if (isAuthenticated && user?.role === 'SUPER_ADMIN') {
+      router.push('/command-center');
+    } else if (isAuthenticated && user?.role === 'STUDENT') {
       router.push('/student');
     }
   }, [isAuthenticated, user, router]);
 
   return (
-    <div className="min-h-screen bg-[#EDEAFD] flex flex-col">
+    <div className="min-h-screen bg-[#EDEAFD] flex flex-col relative">
+      <SessionLockModal isOpen={isLocked} onUnlock={unlockSession} />
       <Navbar />
       <div className="flex flex-1 bg-[#EDEAFD]">
         <Sidebar />

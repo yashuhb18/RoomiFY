@@ -260,23 +260,29 @@ export default function WardenRoomsPage() {
             <div className="pt-2">
               {roomPhotos.length > 0 ? (
                 <div className="flex flex-wrap gap-4">
-                  {roomPhotos.map((img: any) => (
-                    <div key={img.id} className="relative group rounded-2xl overflow-hidden border border-[#E5E4E8] shadow-sm w-48 h-32 bg-[#FAFAFA]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={img.imageUrl}
-                        alt="Room Preview"
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => deletePhotoMutation.mutate({ roomId: managedRoom.id, imageId: img.id })}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
+                  {roomPhotos.map((img: any) => {
+                    const photoSrc = img.secureUrl || img.imageUrl || img.url || 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80';
+                    return (
+                      <div key={img.id} className="relative group rounded-2xl overflow-hidden border border-[#E5E4E8] shadow-sm w-48 h-32 bg-[#FAFAFA]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={photoSrc}
+                          alt="Room Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e: any) => {
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80';
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deletePhotoMutation.mutate({ roomId: managedRoom.id, imageId: img.id })}
+                          className="absolute top-2 right-2 p-1.5 rounded-full bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="p-8 rounded-2xl bg-[#FAFAFA] border border-dashed border-[#E5E4E8] text-center space-y-2">
