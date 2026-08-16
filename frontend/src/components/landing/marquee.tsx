@@ -2,38 +2,46 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Sparkles } from 'lucide-react';
 
 interface MarqueeProps {
   items: string[];
   className?: string;
   speed?: 'slow' | 'normal' | 'fast';
+  bgColor?: string;
 }
 
-export function Marquee({ items, className, speed = 'normal' }: MarqueeProps) {
-  // Duplicate 4 times to guarantee smooth infinite looping seamlessly
-  const quadItems = [...items, ...items, ...items, ...items];
+export function Marquee({ items, className, speed = 'normal', bgColor = '#FAF8F5' }: MarqueeProps) {
+  const doubled = [...items, ...items, ...items, ...items];
 
   return (
-    <div className={cn('relative w-full overflow-hidden py-3 bg-[#EDEAFD]', className)}>
-      {/* Soft gradient fade on left and right edges */}
-      <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[#EDEAFD] to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#EDEAFD] to-transparent z-10 pointer-events-none" />
+    <div className={cn('relative w-full overflow-hidden py-1', className)}>
+      {/* Dynamic Edge Fades matching container background */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-20 z-10 pointer-events-none"
+        style={{ background: `linear-gradient(to right, ${bgColor}, transparent)` }}
+      />
+      <div
+        className="absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none"
+        style={{ background: `linear-gradient(to left, ${bgColor}, transparent)` }}
+      />
 
       <div
         className={cn(
-          'flex whitespace-nowrap w-max animate-marquee gap-4',
-          speed === 'slow' && '[animation-duration:45s]',
-          speed === 'fast' && '[animation-duration:18s]',
+          'flex whitespace-nowrap w-max animate-marquee items-center',
+          speed === 'slow' && '[animation-duration:50s]',
+          speed === 'normal' && '[animation-duration:30s]',
+          speed === 'fast' && '[animation-duration:20s]',
         )}
       >
-        {quadItems.map((item, i) => (
+        {doubled.map((item, i) => (
           <div
             key={`${item}-${i}`}
-            className="px-4 py-2 rounded-full bg-white/80 backdrop-blur-md border border-[#E5E4E8] text-xs font-bold text-[#3C315B] shadow-sm flex items-center gap-2 shrink-0 transition-transform hover:scale-105"
+            className="flex items-center gap-3 mx-6 shrink-0"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#6A4FE0]" />
-            <span>{item}</span>
+            <span className="w-2 h-2 rounded-full bg-[#6A4FE0]/60 shrink-0" />
+            <span className="text-base md:text-lg font-semibold text-[#2B231A] tracking-tight">
+              {item}
+            </span>
           </div>
         ))}
       </div>

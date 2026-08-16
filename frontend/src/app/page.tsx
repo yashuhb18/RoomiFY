@@ -99,50 +99,33 @@ export default function RootHomePage() {
           </div>
         </div>
 
-        {/* Continuous Infinite Horizontal Ribbon Marquee */}
-        <div className="py-2">
-          <p className="text-[11px] font-extrabold text-[#3C315B]/50 uppercase tracking-widest text-center mb-2">
-            TRUSTED BY MODERN CAMPUS RESIDENCE HALLS &amp; STUDENT COMMUNITIES
-          </p>
-          <Marquee
-            speed="fast"
-            items={[
-              'Aegis Hostel Operations',
-              'PostgreSQL Row-Level Security',
-              'Argon2id Authentication',
-              'Symbiotic Strain Roommate Matcher',
-              'Peer-to-Peer Marketplace',
-              'SLA Maintenance Tracker',
-              'Razorpay Merchant Checkout',
-              'Emoji Cipher 2FA',
-              'Passkey WebAuthn Auth',
-            ]}
-          />
-        </div>
-
         {/* Full 3D Holographic Showcase Section */}
         <div id="features">
           <Holographic3DShowcaseSection />
         </div>
       </main>
 
-      {/* Rich Full-Width Glass Footer Card */}
-      <footer className="w-full max-w-[1400px] mx-auto bg-white/95 backdrop-blur-2xl border border-[#E5E4E8] rounded-[36px] p-8 md:p-12 shadow-xl space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-sm">
+      {/* Sleek Light Lavender / Azure Glass Footer Card */}
+      <footer className="w-full max-w-[1400px] mx-auto bg-gradient-to-br from-[#F5F2FF] via-[#FFFFFF] to-[#F0F7FF] border border-[#E0D7FF] rounded-[36px] p-8 md:p-14 text-[#3C315B] shadow-md space-y-10 relative overflow-hidden">
+        {/* Soft Ambient Lavender Glow */}
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[80%] bg-[#6A4FE0]/8 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[70%] bg-blue-400/8 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-10 text-sm">
           {/* Brand Info */}
           <div className="space-y-4 md:col-span-1">
-            <Logo size="md" href="/" />
-            <p className="text-[#3C315B]/70 leading-relaxed font-normal text-xs md:text-sm">
-              Next-generation zero-trust hostel management platform. Built with Next.js, NestJS, and PostgreSQL.
+            <Logo size="md" variant="light" href="/" />
+            <p className="text-[#3C315B]/75 leading-relaxed font-normal text-xs md:text-sm max-w-sm">
+              Next-generation zero-trust student hostel management platform. Built with Next.js, NestJS, and PostgreSQL.
             </p>
           </div>
 
-          {/* 5 Student Features Column (Bigger Font Size & Original Font Weight) */}
-          <div className="space-y-2">
-            <h4 className="font-extrabold text-[#3C315B] uppercase tracking-wider text-xs md:text-sm">
+          {/* Student Features Column */}
+          <div className="space-y-3">
+            <h4 className="font-extrabold text-[#1E1640] uppercase tracking-wider text-xs md:text-sm">
               Student Features
             </h4>
-            <ul className="space-y-2 text-[#3C315B]/70 font-medium text-xs md:text-sm">
+            <ul className="space-y-2 text-[#3C315B]/80 font-medium text-xs md:text-sm">
               <li>
                 <a href="#matching" className="hover:text-[#6A4FE0] transition-colors">
                   1. Symbiotic Roommate Matcher
@@ -168,26 +151,33 @@ export default function RootHomePage() {
                   5. WebAuthn Passkey Security
                 </a>
               </li>
+              <li>
+                <a href="#matching" className="hover:text-[#6A4FE0] transition-colors">
+                  6. Automated Mail Service
+                </a>
+              </li>
             </ul>
           </div>
 
-          {/* Security Protocol Badge */}
+          {/* Security Protocol Badge Card */}
           <div className="space-y-3">
-            <h4 className="font-extrabold text-[#3C315B] uppercase tracking-wider text-xs md:text-sm">
+            <h4 className="font-extrabold text-[#1E1640] uppercase tracking-wider text-xs md:text-sm">
               Security Protocol
             </h4>
-            <div className="p-4 rounded-2xl bg-[#ECE8FE] border border-[#AB9FF2]/40 space-y-1.5">
-              <span className="flex items-center gap-2 font-extrabold text-[#3C315B] text-xs md:text-sm">
+            <div className="p-4.5 rounded-2xl bg-[#F3F0FF] border border-[#DCD3FF] space-y-2 shadow-xs">
+              <span className="flex items-center gap-2 font-extrabold text-[#1E1640] text-xs md:text-sm">
+                <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
                 <ShieldCheck className="w-4 h-4 text-[#6A4FE0]" /> PostgreSQL RLS Active
               </span>
-              <p className="text-xs text-[#3C315B]/75 font-medium leading-relaxed">
+              <p className="text-xs text-[#3C315B]/75 font-normal leading-relaxed">
                 Multi-tenant row level isolation active across database sessions.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-[#E5E4E8] pt-5 flex flex-col sm:flex-row items-center justify-between text-xs md:text-sm text-[#3C315B]/70 gap-4 font-semibold">
+        {/* Footer Bottom Bar */}
+        <div className="relative z-10 border-t border-[#E5E4E8] pt-6 flex flex-col sm:flex-row items-center justify-between text-xs md:text-sm text-[#3C315B]/70 gap-4 font-medium">
           <span>RoomiFY Zero-Trust Student Hostel Platform &copy; 2026</span>
           <div className="flex items-center gap-6">
             <span className="hover:text-[#6A4FE0] cursor-pointer transition-colors">Privacy Policy</span>

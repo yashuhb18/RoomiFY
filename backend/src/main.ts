@@ -125,11 +125,7 @@ async function bootstrap() {
 
   await app.listen(port, '0.0.0.0');
 
-  winstonLogger.log({
-    level: 'log',
-    message: `🚀 AEGIS Hostel API running on port ${port}`,
-    context: 'Bootstrap',
-  });
+  winstonLogger.log(`🚀 AEGIS Hostel API running on port ${port}`, 'Bootstrap');
 }
 
 bootstrap();

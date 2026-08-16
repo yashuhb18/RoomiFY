@@ -37,6 +37,15 @@ export class AuthService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    // Run schema setup and demo account seeding in background so NestJS app starts instantly
+    setImmediate(() => {
+      this.initSecurityTablesAndDemoAccounts().catch((err) =>
+        this.logger.warn('Background init error:', err),
+      );
+    });
+  }
+
+  private async initSecurityTablesAndDemoAccounts() {
     try {
       await this.prisma.$executeRawUnsafe(`
         CREATE TABLE IF NOT EXISTS "passkey_credentials" (
@@ -73,177 +82,75 @@ export class AuthService implements OnModuleInit {
           "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
       `);
-      // Guarantee both camelCase and snake_case column support for passkey_credentials
-      const alterPasskeyStatements = [
-        'ALTER TABLE "passkey_credentials" ADD COLUMN IF NOT EXISTS "userId" TEXT',
-        'ALTER TABLE "passkey_credentials" ADD COLUMN IF NOT EXISTS "credentialId" TEXT',
-        'ALTER TABLE "passkey_credentials" ADD COLUMN IF NOT EXISTS "publicKey" TEXT',
-        'ALTER TABLE "passkey_credentials" ADD COLUMN IF NOT EXISTS "deviceType" TEXT',
-        'ALTER TABLE "passkey_credentials" ADD COLUMN IF NOT EXISTS "backedUp" BOOLEAN DEFAULT true',
-        'ALTER TABLE "passkey_credentials" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP',
-        'ALTER TABLE "passkey_credentials" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP',
-        'ALTER TABLE "passkey_credentials" ADD COLUMN IF NOT EXISTS "updated_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP',
-        'UPDATE "passkey_credentials" SET "userId" = "user_id" WHERE "userId" IS NULL',
-        'UPDATE "passkey_credentials" SET "credentialId" = "credential_id" WHERE "credentialId" IS NULL',
-        'UPDATE "passkey_credentials" SET "publicKey" = "public_key" WHERE "publicKey" IS NULL',
-        'UPDATE "passkey_credentials" SET "deviceType" = "device_type" WHERE "deviceType" IS NULL',
-        'UPDATE "passkey_credentials" SET "user_id" = "userId" WHERE "user_id" IS NULL',
-        'UPDATE "passkey_credentials" SET "credential_id" = "credentialId" WHERE "credential_id" IS NULL',
-        'UPDATE "passkey_credentials" SET "public_key" = "publicKey" WHERE "public_key" IS NULL',
-        'UPDATE "passkey_credentials" SET "device_type" = "deviceType" WHERE "device_type" IS NULL',
-        'UPDATE "passkey_credentials" SET "updated_at" = "updatedAt" WHERE "updated_at" IS NULL',
-        'UPDATE "passkey_credentials" SET "updatedAt" = "updated_at" WHERE "updatedAt" IS NULL',
-      ];
 
-      for (const stmt of alterPasskeyStatements) {
-        await this.prisma.$executeRawUnsafe(stmt).catch(() => {});
-      }
-
-      const alterCipherStatements = [
-        'ALTER TABLE "emoji_ciphers" ADD COLUMN IF NOT EXISTS "userId" TEXT',
-        'ALTER TABLE "emoji_ciphers" ADD COLUMN IF NOT EXISTS "sequenceHash" TEXT',
-        'ALTER TABLE "emoji_ciphers" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP',
-        'ALTER TABLE "emoji_ciphers" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP',
-        'ALTER TABLE "emoji_ciphers" ADD COLUMN IF NOT EXISTS "created_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP',
-        'ALTER TABLE "emoji_ciphers" ADD COLUMN IF NOT EXISTS "updated_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP',
-        'UPDATE "emoji_ciphers" SET "userId" = "user_id" WHERE "userId" IS NULL',
-        'UPDATE "emoji_ciphers" SET "user_id" = "userId" WHERE "user_id" IS NULL',
-      ];
-
-      for (const stmt of alterCipherStatements) {
-        await this.prisma.$executeRawUnsafe(stmt).catch(() => {});
-      }
-
-      const alterChallengeStatements = [
-        'ALTER TABLE "auth_challenge_sessions" ADD COLUMN IF NOT EXISTS "userId" TEXT',
-        'ALTER TABLE "auth_challenge_sessions" ADD COLUMN IF NOT EXISTS "expiresAt" TIMESTAMP(3)',
-        'ALTER TABLE "auth_challenge_sessions" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP',
-        'ALTER TABLE "auth_challenge_sessions" ADD COLUMN IF NOT EXISTS "expires_at" TIMESTAMP(3)',
-        'ALTER TABLE "auth_challenge_sessions" ADD COLUMN IF NOT EXISTS "created_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP',
-        'UPDATE "auth_challenge_sessions" SET "userId" = "user_id" WHERE "userId" IS NULL',
-        'UPDATE "auth_challenge_sessions" SET "user_id" = "userId" WHERE "user_id" IS NULL',
-      ];
-
-      for (const stmt of alterChallengeStatements) {
-        await this.prisma.$executeRawUnsafe(stmt).catch(() => {});
-      }
-
-      this.logger.log('✅ Passkey and EmojiCipher security tables initialized successfully.');
+      this.logger.log('✅ Security tables verified.');
     } catch (e) {
       this.logger.warn('Security tables initialization note:', e);
     }
 
+    await this.seedDemoAccounts();
+  }
+
+  private async seedDemoAccounts() {
     try {
-      const email = 'owner@aegis.hostel';
-      const existing = await this.prisma.user.findUnique({ where: { email } });
-      if (!existing) {
-        let hostel = await this.prisma.hostel.findFirst();
-        if (!hostel) {
-          hostel = await this.prisma.hostel.create({
-            data: { name: 'AEGIS Main Campus', address: '128 Innovation Way' },
-          });
-        }
-        const passwordHash = await argon2.hash('SuperAdmin123!', {
-          type: argon2.argon2id,
-          memoryCost: 65536,
-          timeCost: 3,
-          parallelism: 4,
+      let hostel = await this.prisma.hostel.findFirst();
+      if (!hostel) {
+        hostel = await this.prisma.hostel.create({
+          data: { name: 'AEGIS Main Campus', address: '128 Innovation Way' },
         });
-        await this.prisma.user.create({
-          data: {
-            email,
-            passwordHash,
-            role: Role.SUPER_ADMIN,
-            hostelId: hostel.id,
-            profile: { fullName: 'Global Platform Owner', phone: '+91 99999 99999' },
-          },
-        });
-        this.logger.log('Super Admin user owner@aegis.hostel seeded successfully.');
       }
+
+      // 1. Seed & Sync Super Admin (owner@aegis.hostel / SuperAdmin123!)
+      const superAdminHash = await argon2.hash('SuperAdmin123!');
+      await this.prisma.user.upsert({
+        where: { email: 'owner@aegis.hostel' },
+        update: { passwordHash: superAdminHash, role: Role.SUPER_ADMIN, isActive: true, hostelId: hostel.id },
+        create: {
+          email: 'owner@aegis.hostel',
+          passwordHash: superAdminHash,
+          role: Role.SUPER_ADMIN,
+          hostelId: hostel.id,
+          profile: { fullName: 'Global Platform Owner', phone: '+91 99999 99999' },
+        },
+      });
+
+      // 2. Seed & Sync Warden (warden@aegis.hostel / Warden123!)
+      const wardenHash = await argon2.hash('Warden123!');
+      await this.prisma.user.upsert({
+        where: { email: 'warden@aegis.hostel' },
+        update: { passwordHash: wardenHash, role: Role.WARDEN, isActive: true, hostelId: hostel.id },
+        create: {
+          email: 'warden@aegis.hostel',
+          passwordHash: wardenHash,
+          role: Role.WARDEN,
+          hostelId: hostel.id,
+          profile: { fullName: 'Hostel Chief Warden', phone: '+91 98765 43210' },
+        },
+      });
+
+      // 3. Seed & Sync Student (student@aegis.hostel / Student123!)
+      const studentHash = await argon2.hash('Student123!');
+      await this.prisma.user.upsert({
+        where: { email: 'student@aegis.hostel' },
+        update: { passwordHash: studentHash, role: Role.STUDENT, isActive: true, hostelId: hostel.id },
+        create: {
+          email: 'student@aegis.hostel',
+          passwordHash: studentHash,
+          role: Role.STUDENT,
+          hostelId: hostel.id,
+          profile: { fullName: 'Alex Rivera', roomNumber: '304-A', wing: 'North Wing' },
+        },
+      });
+
+      this.logger.log('✅ Standard demo accounts seeded and synced: owner@aegis.hostel, warden@aegis.hostel, student@aegis.hostel');
     } catch (err) {
-      this.logger.warn('OnModuleInit seed error', err);
+      this.logger.warn('Seed background error:', err);
     }
   }
 
   async validateUser(email: string, password: string): Promise<any> {
     try {
       const normalizedEmail = email.toLowerCase().trim();
-
-      if (normalizedEmail === 'owner@aegis.hostel') {
-        let user = await this.prisma.user.findUnique({
-          where: { email: normalizedEmail },
-        });
-
-        if (!user) {
-          let hostel = await this.prisma.hostel.findFirst();
-          if (!hostel) {
-            hostel = await this.prisma.hostel.create({
-              data: { name: 'AEGIS Main Campus', address: '128 Innovation Way' },
-            });
-          }
-          const defaultHash = await argon2.hash('SuperAdmin123!', { type: argon2.argon2id });
-          user = await this.prisma.user.create({
-            data: {
-              email: 'owner@aegis.hostel',
-              passwordHash: defaultHash,
-              role: Role.SUPER_ADMIN,
-              hostelId: hostel.id,
-              profile: { fullName: 'Global Platform Owner', phone: '+91 99999 99999' },
-            },
-          });
-        } else if (!user.isActive || user.role !== Role.SUPER_ADMIN) {
-          user = await this.prisma.user.update({
-            where: { id: user.id },
-            data: { isActive: true, role: Role.SUPER_ADMIN },
-          });
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          role: Role.SUPER_ADMIN,
-          hostelId: user.hostelId,
-          isMfaEnabled: false,
-        };
-      }
-
-      if (normalizedEmail === 'warden@aegis.hostel') {
-        let user = await this.prisma.user.findUnique({
-          where: { email: normalizedEmail },
-        });
-
-        if (!user) {
-          let hostel = await this.prisma.hostel.findFirst();
-          if (!hostel) {
-            hostel = await this.prisma.hostel.create({
-              data: { name: 'AEGIS Main Campus', address: '128 Innovation Way' },
-            });
-          }
-          const defaultHash = await argon2.hash('Warden123!', { type: argon2.argon2id });
-          user = await this.prisma.user.create({
-            data: {
-              email: 'warden@aegis.hostel',
-              passwordHash: defaultHash,
-              role: Role.WARDEN,
-              hostelId: hostel.id,
-              profile: { fullName: 'Hostel Chief Warden', phone: '+91 98765 43210' },
-            },
-          });
-        } else if (!user.isActive || user.role !== Role.WARDEN) {
-          user = await this.prisma.user.update({
-            where: { id: user.id },
-            data: { isActive: true, role: Role.WARDEN },
-          });
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          role: Role.WARDEN,
-          hostelId: user.hostelId,
-          isMfaEnabled: false,
-        };
-      }
 
       const user = await this.prisma.user.findUnique({
         where: { email: normalizedEmail },
