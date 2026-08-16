@@ -21,37 +21,37 @@ export default function RootHomePage() {
         {/* Left: Logo */}
         <Logo size="md" href="/" />
 
-        {/* Center Nav Links (5 Features with Bigger Fonts) */}
-        <div className="hidden lg:flex items-center gap-7 bg-white border border-[#E5E4E8] rounded-full px-7 py-2.5 shadow-md text-sm font-extrabold text-[#3C315B]">
-          <a href="#matching" className="hover:text-[#6A4FE0] transition-colors">
+        {/* Center Nav Links (5 Features with Original Font Weight & Subtle Color) */}
+        <div className="hidden lg:flex items-center gap-6 bg-white border border-[#E5E4E8] rounded-full px-6 py-2 shadow-sm text-sm font-semibold text-[#3C315B]/80">
+          <a href="#matching" className="hover:text-[#3C315B] transition-colors">
             Roommate Match
           </a>
-          <a href="#allocation" className="hover:text-[#6A4FE0] transition-colors">
+          <a href="#allocation" className="hover:text-[#3C315B] transition-colors">
             Room Allocation
           </a>
-          <a href="#marketplace" className="hover:text-[#6A4FE0] transition-colors">
+          <a href="#marketplace" className="hover:text-[#3C315B] transition-colors">
             Marketplace
           </a>
-          <a href="#maintenance" className="hover:text-[#6A4FE0] transition-colors">
+          <a href="#maintenance" className="hover:text-[#3C315B] transition-colors">
             Maintenance SLA
           </a>
-          <a href="#security" className="hover:text-[#6A4FE0] transition-colors">
+          <a href="#security" className="hover:text-[#3C315B] transition-colors">
             Zero-Trust Security
           </a>
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-5 text-sm font-extrabold">
+        <div className="flex items-center gap-4 text-sm font-semibold">
           <Link
             href="/login"
-            className="text-[#3C315B] hover:text-[#6A4FE0] transition-colors"
+            className="text-[#3C315B]/80 hover:text-[#3C315B] transition-colors"
           >
             Log in
           </Link>
           <button
             type="button"
             onClick={() => router.push('/register')}
-            className="bg-[#6A4FE0] hover:bg-[#583EC2] text-white px-6 py-2.5 rounded-full transition-all shadow-md font-extrabold text-sm"
+            className="bg-[#AB9FF2] hover:bg-[#9688EE] text-white px-5 py-2 rounded-full transition-all shadow-sm text-sm font-semibold"
           >
             Get Started
           </button>
@@ -137,12 +137,12 @@ export default function RootHomePage() {
             </p>
           </div>
 
-          {/* 5 Student Features Column (Bigger Font Size) */}
-          <div className="space-y-3">
+          {/* 5 Student Features Column (Bigger Font Size & Original Font Weight) */}
+          <div className="space-y-2">
             <h4 className="font-extrabold text-[#3C315B] uppercase tracking-wider text-xs md:text-sm">
               Student Features
             </h4>
-            <ul className="space-y-2.5 text-[#3C315B]/80 font-bold text-xs md:text-sm">
+            <ul className="space-y-2 text-[#3C315B]/70 font-medium text-xs md:text-sm">
               <li>
                 <a href="#matching" className="hover:text-[#6A4FE0] transition-colors">
                   1. Symbiotic Roommate Matcher
